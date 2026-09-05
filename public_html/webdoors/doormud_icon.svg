@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="mudBgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#05101a" />
+      <stop offset="50%" stop-color="#0c2333" />
+      <stop offset="100%" stop-color="#02080d" />
+    </linearGradient>
+    <radialGradient id="portalGlow" cx="50%" cy="55%" r="45%">
+      <stop offset="0%" stop-color="#40e0d0" stop-opacity="0.9" />
+      <stop offset="40%" stop-color="#008080" stop-opacity="0.6" />
+      <stop offset="80%" stop-color="#001a33" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="torchGlowAmber" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffb733" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="mudGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff099" />
+      <stop offset="50%" stop-color="#e6b800" />
+      <stop offset="100%" stop-color="#806000" />
+    </linearGradient>
+    <linearGradient id="stoneArchGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4a5a6a" />
+      <stop offset="100%" stop-color="#1a222c" />
+    </linearGradient>
+    <filter id="cyanGlow">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer Frame -->
+  <rect x="8" y="8" width="496" height="496" rx="28" fill="#10151c" stroke="#1c3d52" stroke-width="8" />
+  <rect x="20" y="20" width="472" height="472" rx="20" fill="url(#mudBgGrad)" stroke="#2b6180" stroke-width="3" />
+
+  <!-- Background Labyrinth Cavern -->
+  <path d="M40 380 L80 180 L180 80 L332 80 L432 180 L472 380 Z" fill="#09141d" />
+
+  <!-- Glowing Mystical Dungeon Portal -->
+  <ellipse cx="256" cy="250" rx="140" ry="160" fill="url(#portalGlow)" />
+  
+  <!-- Swirling Portal Energy Rings -->
+  <ellipse cx="256" cy="250" rx="105" ry="120" fill="none" stroke="#7fffd4" stroke-width="3" stroke-dasharray="14 8" filter="url(#cyanGlow)" />
+  <ellipse cx="256" cy="250" rx="70" ry="80" fill="none" stroke="#00ffff" stroke-width="4" stroke-dasharray="10 6" filter="url(#cyanGlow)" />
+  <ellipse cx="256" cy="250" rx="35" ry="40" fill="#e0ffff" filter="url(#cyanGlow)" />
+
+  <!-- Dungeon Archway Pillars & Keystone -->
+  <!-- Left Pillar -->
+  <rect x="100" y="180" width="45" height="210" rx="6" fill="url(#stoneArchGrad)" stroke="#0c1722" stroke-width="3" />
+  <rect x="94" y="380" width="57" height="25" rx="4" fill="#2d3844" stroke="#0c1722" stroke-width="2" />
+  <!-- Right Pillar -->
+  <rect x="367" y="180" width="45" height="210" rx="6" fill="url(#stoneArchGrad)" stroke="#0c1722" stroke-width="3" />
+  <rect x="361" y="380" width="57" height="25" rx="4" fill="#2d3844" stroke="#0c1722" stroke-width="2" />
+
+  <!-- Arch Curved Top Stones -->
+  <path d="M100 190 Q256 70 412 190 L380 220 Q256 120 132 220 Z" fill="url(#stoneArchGrad)" stroke="#0c1722" stroke-width="4" />
+  <!-- Keystone -->
+  <polygon points="236,80 276,80 286,130 226,130" fill="#586b7d" stroke="#0c1722" stroke-width="3" />
+
+  <!-- Torches on Pillars -->
+  <!-- Left Torch -->
+  <circle cx="78" cy="230" r="45" fill="url(#torchGlowAmber)" />
+  <rect x="74" y="235" width="8" height="35" rx="2" fill="#5c3818" stroke="#221105" stroke-width="2" />
+  <path d="M78 220 Q86 232 78 238 Q70 232 78 220 Z" fill="#ff4500" />
+  <path d="M78 225 Q82 233 78 236 Q74 233 78 225 Z" fill="#ffea00" />
+
+  <!-- Right Torch -->
+  <circle cx="434" cy="230" r="45" fill="url(#torchGlowAmber)" />
+  <rect x="430" y="235" width="8" height="35" rx="2" fill="#5c3818" stroke="#221105" stroke-width="2" />
+  <path d="M434 220 Q442 232 434 238 Q426 232 434 220 Z" fill="#ff4500" />
+  <path d="M434 225 Q438 233 434 236 Q430 233 434 225 Z" fill="#ffea00" />
+
+  <!-- Ancient Magical Runes on Archway -->
+  <g fill="#40e0d0" filter="url(#cyanGlow)" font-family="monospace" font-size="18" font-weight="bold">
+    <text x="115" y="240">᚛</text>
+    <text x="115" y="280">ᚱ</text>
+    <text x="115" y="320">ᚢ</text>
+    <text x="115" y="360">ᚾ</text>
+    <text x="382" y="240">ᚦ</text>
+    <text x="382" y="280">ᚨ</text>
+    <text x="382" y="320">ᛗ</text>
+    <text x="382" y="360">᚜</text>
+  </g>
+
+  <!-- Title Banner Box -->
+  <rect x="36" y="405" width="440" height="75" rx="14" fill="#08141e" stroke="url(#mudGoldGrad)" stroke-width="4" />
+  <rect x="42" y="411" width="428" height="63" rx="10" fill="#04202c" />
+
+  <!-- Title Text -->
+  <text x="256" y="445" font-family="'Courier New', Courier, monospace, Impact, sans-serif" font-weight="900" font-size="32" fill="#7fffd4" text-anchor="middle" letter-spacing="3" stroke="#000" stroke-width="2" filter="url(#cyanGlow)">DOORMUD</text>
+  <text x="256" y="468" font-family="'Courier New', Courier, monospace, sans-serif" font-weight="700" font-size="14" fill="#ffd700" text-anchor="middle" letter-spacing="4">LAND OF THE FORGOTTEN</text>
+</svg>

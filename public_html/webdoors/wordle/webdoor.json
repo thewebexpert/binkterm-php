@@ -4,8 +4,8 @@
     "id": "wordle",
     "name": "Wordle",
     "version": "1.0.0",
-    "author": "Claude",
-    "description": "Guess the five-letter word in six tries",
+    "author": "BinktermPHP",
+    "description": "Daily and free-play five-letter word guessing game with game stats and monthly leaderboards.",
     "entry_point": "index.html",
     "icon": "icon.svg",
     "screenshots": []

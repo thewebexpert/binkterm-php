@@ -2,12 +2,12 @@
   "type": "nativedoor",
   "version": "1.0",
   "game": {
-    "name": "BBSLink",
+    "name": "BBSLink Door Gateway",
     "short_name": "BBSLink",
-    "author": "BinktermPHP",
+    "author": "Mark Percival (BBSLink.net)",
     "version": "1.0",
     "release_year": 2026,
-    "description": "Connect to BBSLink Door Gateway",
+    "description": "Gateway to inter-BBS door games on the BBSLink network, featuring global leaderboards and multi-BBS competition.",
     "players": "Multi-player",
     "icon": "img.png",
     "screenshot": null

@@ -4,9 +4,9 @@
   "game": {
     "id": "klondike-solitaire",
     "name": "Klondike Solitaire",
-    "description": "Classic single-player Klondike Solitaire implemented as a WebDoor game.",
+    "description": "Classic single-player Klondike Solitaire card game with auto-complete and move history.",
     "version": "1.0.0",
-    "author": "Claude",
+    "author": "BinktermPHP",
     "license": "MIT",
     "homepage": "https://example.invalid/webdoor/solitaire",
     "icon": "icon.svg"

@@ -3,9 +3,9 @@
   "game": {
     "id": "hangman",
     "name": "Hangman",
-    "description": "Classic Hangman. Guess the word before the stick figure is complete.",
+    "description": "Classic word guessing game with multiple categories, statistics tracking, and interactive graphics.",
     "version": "1.0.0",
-    "author": "ChatGPT",
+    "author": "BinktermPHP",
     "license": "MIT",
     "icon": "icon.svg"
   },
