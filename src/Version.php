@@ -70,6 +70,14 @@ class Version
      */
     public static function getTearline(): string
     {
+        try {
+            $custom = BbsConfig::getConfig()['custom_tearline'] ?? null;
+            if (!empty($custom) && is_string($custom)) {
+                $trimmed = trim($custom);
+                return str_starts_with($trimmed, '---') ? $trimmed : '--- ' . $trimmed;
+            }
+        } catch (\Throwable $e) {}
+
         return '--- ' . self::getFullVersion();
     }
 
@@ -84,6 +92,14 @@ class Version
      */
     public static function getTearlineWithComponent(?string $component): string
     {
+        try {
+            $custom = BbsConfig::getConfig()['custom_tearline'] ?? null;
+            if (!empty($custom) && is_string($custom)) {
+                $trimmed = trim($custom);
+                return str_starts_with($trimmed, '---') ? $trimmed : '--- ' . $trimmed;
+            }
+        } catch (\Throwable $e) {}
+
         if ($component === null || $component === '') {
             return self::getTearline();
         }

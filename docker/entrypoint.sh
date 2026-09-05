@@ -181,6 +181,9 @@ LOGROTATE_KEEP="${LOGROTATE_KEEP:-52}"
 
 chmod 644 /etc/cron.d/binkterm
 
+# Clean up any stale PID files from unclean shutdowns
+rm -f /var/run/apache2/apache2.pid /var/run/apache2/*.pid
+
 echo "Initialization complete!"
 echo ""
 

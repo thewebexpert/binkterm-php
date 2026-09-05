@@ -316,6 +316,7 @@ class Scheduler
                 $this->log("Outbound poll completed for: {$address}");
                 
             } catch (\Exception $e) {
+                $this->lastOutboundPollTimes[$address] = time();
                 $this->log("Outbound poll failed for {$address}: " . $e->getMessage(), 'ERROR');
                 $results[$address] = [
                     'success' => false,

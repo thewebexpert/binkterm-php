@@ -8,6 +8,10 @@ config/welcome.txt
 config/terminal_welcome.txt
 config/systemnews.twig
 templates/custom/*
+public_html/js/door-filter.js
+public_html/css/door-filter.css
+public_html/js/echo-filter.js
+public_html/css/echo-filter.css
 data/*
 !data/.gitkeep
 !data/run/
@@ -78,3 +82,5 @@ bugreports/
 
 # Sysop-local Docker Compose overrides (see docker-compose.override.yml.example)
 docker-compose.override.yml
+public_html/css/adventure*.css
+*.patch

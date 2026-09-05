@@ -9,8 +9,13 @@ Before executing tasks, you must look into the following active instruction sets
 - @.claude/commands/
 - @CLAUDE.md
 
-## GitHub Access
+## GitHub Access & Pull Requests
 Use the GitHub CLI `gh` for GitHub access by default in this workspace. Prefer `gh` over other GitHub integrations or APIs unless `gh` is unavailable or the task explicitly requires another path.
+
+- **Upstream Repository**: `awehttam/binkterm-php` (remote `upstream`)
+- **Fork Repository**: `thewebexpert/binkterm-php` (remote `origin`)
+- **PR Target Base Branch**: Always target **`claudesbbs`** (`--base claudesbbs`), **NOT** `main`.
+- **Branching Workflow**: Always branch off `upstream/claudesbbs` (e.g. `git checkout -b fix/<name> upstream/claudesbbs`) for upstream PRs. Keep PRs scoped to upstream fixes/features without including local BBS-specific customizations.
 
 When `gh` fails from the sandbox with network, proxy, keyring, or auth-status errors, retry it with elevated permissions before concluding that GitHub access is actually broken. In this workspace, `gh` may need to run elevated to reach the network and local credential store correctly.
 
