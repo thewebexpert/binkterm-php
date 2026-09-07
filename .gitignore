@@ -84,3 +84,6 @@ bugreports/
 docker-compose.override.yml
 public_html/css/adventure*.css
 *.patch
+
+# Native door local secrets
+native-doors/doors/bbslinknative/vars.sh

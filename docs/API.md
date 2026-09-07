@@ -575,7 +575,10 @@ Inspects recent message history from the specified uplink to find the latest inc
 | Field | Type | Description |
 |-------|------|-------------|
 | `success` | boolean | True on successful synchronization |
-| `summary` | object | Summary of changes (`created`, `activated`, `deactivated`) |
+| `summary` | object | Summary of changes applied to the local database |
+| `summary.created` | integer | Number of new areas inserted |
+| `summary.activated` | integer | Number of existing inactive areas re-activated |
+| `summary.deactivated` | integer | Number of areas deactivated (always `0` for this endpoint; it never deactivates missing areas) |
 | `areas_count` | integer | Number of areas parsed and synchronized |
 | `from` | string | Sender name or address of the reply message |
 
@@ -4484,6 +4487,8 @@ JSON object with media type, provider name, and embed HTML.
 
 Bridge-facing endpoints authenticated with a per-node Bearer token (`Authorization: Bearer <api_key>`).
 
+All MeshCore endpoints (bridge-facing, user-facing, and public) return `404 Not found` when the **MeshCore** feature is disabled in **Admin → BBS Settings → System & Features** (`features.meshcore` in `config/bbs.json`).
+
 | Method | Path | Auth | Summary |
 |--------|------|------|---------|
 | `POST` | [`/api/meshcore/contact`](#post-apimeshcorecontact) | Bearer | Report a companion contact from a MeshCore bridge. |
@@ -5415,7 +5420,7 @@ Complete echomail message object
 
 **Requires authentication**
 
-Sends a message (netmail or echomail) with support for multiple charsets, markdown/plaintext markup, file attachments, and optional PGP payload handling. Enforces 16 KB FidoNet message body limit. For netmail, resolves attachment tokens to file paths. Supports crashmail flag and file request (FREQ) mode. Validates charset against a whitelist of safe values. Defaults to system address if no recipient specified for netmail.
+Sends a message (netmail or echomail) with support for multiple charsets, markdown/plaintext markup, file attachments, and optional PGP payload handling. Enforces 16 KB FidoNet message body limit. For netmail, resolves attachment tokens to file paths. Supports crashmail flag and file request (FREQ) mode. Validates charset against a whitelist of safe values. Defaults to system address if no recipient specified for netmail. On a successful send, any associated draft is deleted: the draft identified by `draft_id` if supplied, otherwise the most recent draft matching the message's area/recipient and subject.
 
 **Request Body** _(JSON)_
 
@@ -5432,6 +5437,9 @@ Message composition payload
 | `crashmail` | boolean | No | Send as crashmail (netmail only) |
 | `is_freq` | boolean | No | Mark as file request (netmail only) |
 | `pgp_mode` | string | No | PGP handling mode: `encrypt` for netmail encryption or `sign` for echomail signing |
+| `draft_id` | integer | No | ID of the draft this message was composed from; deleted on successful send |
+| `subject` | string | No | Message subject; also used to match a draft for cleanup when `draft_id` is absent |
+| `echoarea` | string | No | Target echo area (echomail); also used to match a draft for cleanup when `draft_id` is absent |
 
 **Response** _(JSON)_
 
@@ -8831,7 +8839,7 @@ User settings object with locale, shell, notification preferences, and license s
 | `settings.netmail_notification_sound` | string | Netmail notification sound (disabled, notify1–5) |
 | `settings.file_notification_sound` | string | File notification sound (disabled, notify1–5) |
 | `settings.compose_advanced_open` | boolean | Whether advanced compose panel is open by default |
-| `settings.compose_hard_wrap` | integer | Hard-wrap column for message composition (0 = disabled) |
+| `settings.compose_hard_wrap` | integer | Hard-wrap column for message composition: `0` (disabled), `39`, `72` (default), or `79`; other values are coerced to `72` |
 | `settings.media_render_mode` | string | Media rendering mode ('click', 'auto') |
 | `settings.license_valid` | boolean | Whether the system has a valid license |
 
