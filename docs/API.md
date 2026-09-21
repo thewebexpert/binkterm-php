@@ -4614,6 +4614,7 @@ Marks a device command as executed. The bridge calls this after dispatching the 
 | `GET` | [`/api/messages/drafts`](#get-apimessagesdrafts) | Yes | Retrieve authenticated user's draft messages. |
 | `GET` | [`/api/messages/drafts/{id}`](#get-apimessagesdraftsid) | Yes | Retrieve a specific draft message by ID. |
 | `DELETE` | [`/api/messages/drafts/{id}`](#delete-apimessagesdraftsid) | Yes | Delete a draft message. |
+| `POST` | [`/api/messages/drafts/bulk-delete`](#post-apimessagesdraftsbulk-delete) | Yes | Delete multiple draft messages in bulk. |
 | `GET` | [`/api/messages/templates`](#get-apimessagestemplates) | Yes | List message templates for authenticated user. |
 | `GET` | [`/api/messages/templates/{id}`](#get-apimessagestemplatesid) | Yes | Retrieve a single message template with full body. |
 | `POST` | [`/api/messages/templates`](#post-apimessagestemplates) | Yes | Create or update a message template. |
@@ -5656,6 +5657,38 @@ Deletion result with success status and message code.
 
 | Status | Description |
 |--------|-------------|
+| 500 | User ID cannot be resolved or deletion failed. |
+
+---
+
+#### `POST /api/messages/drafts/bulk-delete`
+
+**Requires authentication**
+
+Permanently deletes multiple draft messages belonging to the authenticated user. Each delete is scoped to the owning user, so IDs that do not belong to the caller (or no longer exist) are silently skipped and not counted.
+
+**Request Body** _(JSON)_
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `message_ids` | array of integers | Yes | Draft IDs to delete. Must be a non-empty array. |
+
+**Response** _(JSON)_
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Always `true` when the request was processed. |
+| `message_code` | string | Localization key for the UI message (`ui.drafts.bulk_delete.success`). |
+| `message_params` | object | Parameters for the localized message. |
+| `message_params.count` | integer | Number of drafts actually deleted. |
+| `deleted` | integer | Number of drafts actually deleted. |
+| `total` | integer | Number of IDs supplied in the request. |
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 400 | `message_ids` is missing, empty, or not an array (`errors.messages.drafts.bulk_delete.invalid_input`). |
 | 500 | User ID cannot be resolved or deletion failed. |
 
 ---
@@ -8829,6 +8862,10 @@ User settings object with locale, shell, notification preferences, and license s
 | `settings.font_family` | string | UI font family |
 | `settings.font_size` | integer | UI font size in pixels |
 | `settings.date_format` | string | Date format locale code (e.g., 'en-US') |
+| `settings.date_display_style` | string | Date display style preference ('system_choice', 'relative', 'date') |
+| `settings.echomail_date_field` | string | Echomail date column preference ('system_choice', 'received', 'written') |
+| `settings.effective_date_display_style` | string | Effective resolved date display style ('relative', 'date') |
+| `settings.effective_echomail_date_field` | string | Effective resolved echomail date column ('received', 'written') |
 | `settings.quote_coloring` | boolean | Whether quoted text is colorized |
 | `settings.default_echo_list` | string | Default echo list view (reader, list) |
 | `settings.signature_text` | string\|null | User's message signature |
@@ -8855,7 +8892,7 @@ User settings object with locale, shell, notification preferences, and license s
 
 **Requires authentication**
 
-Updates user settings including locale, shell preference, and notification sounds. Validates notification sound values against allowed set (disabled, notify1-5). Shell changes respect AppearanceConfig lock. Locale changes are persisted. Composition settings (hard wrap, advanced mode) are stored in UserMeta.
+Updates user settings including locale, shell preference, notification sounds, and date display preferences. Validates notification sound values against allowed set (disabled, notify1-5) and date preferences against allowed choices. Shell changes respect AppearanceConfig lock. Locale changes are persisted. Composition settings (hard wrap, advanced mode) are stored in UserMeta.
 
 **Request Body** _(JSON)_
 
@@ -8863,7 +8900,31 @@ Settings update payload
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `settings` | object | Yes | Object containing settings to update: locale, shell, chat_notification_sound, echomail_notification_sound, netmail_notification_sound, file_notification_sound, compose_advanced_open, compose_hard_wrap, media_render_mode |
+| `settings` | object | Yes | Object containing settings to update |
+| `settings.locale` | string | No | UI locale code (e.g., 'en', 'fr') |
+| `settings.shell` | string | No | UI shell preference ('web' or 'bbs-menu') |
+| `settings.timezone` | string | No | User's timezone (e.g., 'America/Los_Angeles') |
+| `settings.theme` | string | No | UI theme (e.g., 'light', 'dark', 'amber') |
+| `settings.messages_per_page` | integer | No | Number of messages shown per page |
+| `settings.threaded_view` | boolean | No | Whether echomail is shown in threaded mode |
+| `settings.netmail_threaded_view` | boolean | No | Whether netmail is shown in threaded mode |
+| `settings.default_sort` | string | No | Default sort order (date_desc, date_asc, subject, author) |
+| `settings.font_family` | string | No | UI font family |
+| `settings.font_size` | integer | No | UI font size in pixels |
+| `settings.date_format` | string | No | Date format locale code (e.g., 'en-US') |
+| `settings.date_display_style` | string | No | Date display style preference ('system_choice', 'relative', 'date') |
+| `settings.echomail_date_field` | string | No | Echomail date column preference ('system_choice', 'received', 'written') |
+| `settings.quote_coloring` | boolean | No | Whether quoted text is colorized |
+| `settings.default_echo_list` | string | No | Default echo list view (reader, list) |
+| `settings.signature_text` | string | No | User's message signature |
+| `settings.default_tagline` | string | No | Default message tagline |
+| `settings.chat_notification_sound` | string | No | Chat notification sound (disabled, notify1–5) |
+| `settings.echomail_notification_sound` | string | No | Echomail notification sound (disabled, notify1–5) |
+| `settings.netmail_notification_sound` | string | No | Netmail notification sound (disabled, notify1–5) |
+| `settings.file_notification_sound` | string | No | File notification sound (disabled, notify1–5) |
+| `settings.compose_advanced_open` | boolean | No | Whether advanced compose panel is open by default |
+| `settings.compose_hard_wrap` | integer | No | Hard-wrap column for message composition: `0` (disabled), `39`, `72` (default), or `79`; other values are coerced to `72` |
+| `settings.media_render_mode` | string | No | Media rendering mode ('click', 'auto') |
 
 **Response** _(JSON)_
 

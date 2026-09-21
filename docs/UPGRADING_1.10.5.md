@@ -8,16 +8,19 @@ Make sure you have a current backup of your database and files before upgrading.
 - [Web Interface](#web-interface)
   - [Message Composition](#message-composition)
   - [Draft Handling on Send](#draft-handling-on-send)
+  - [Bulk Delete on the Drafts Tab](#bulk-delete-on-the-drafts-tab)
   - [Admin BBS Settings](#admin-bbs-settings)
   - [Navbar Active Section Indicator](#navbar-active-section-indicator)
   - [Themed Message Threading Colors](#themed-message-threading-colors)
 - [Messaging / FTN](#messaging--ftn)
   - [NNTP Server](#nntp-server)
   - [AreaFix Reply Sync](#areafix-reply-sync)
+  - [BinkP Schedule Status Panel](#binkp-schedule-status-panel)
 - [Terminal Server](#terminal-server)
   - [Registration House Rules](#registration-house-rules)
   - [Full-Screen Editor Flicker](#full-screen-editor-flicker)
   - [CP437 Login ANSI Art](#cp437-login-ansi-art)
+  - [Message Body Escape-Sequence Filtering](#message-body-escape-sequence-filtering)
 - [Door Games](#door-games)
   - [Door Player Backspace Handling](#door-player-backspace-handling)
   - [BBSDEV.DRP Drop File (Experimental)](#bbsdevdrp-drop-file-experimental)
@@ -30,6 +33,8 @@ Make sure you have a current backup of your database and files before upgrading.
   - [Helper Function Loading](#helper-function-loading)
 - [Documentation](#documentation)
   - [Community Mods List](#community-mods-list)
+- [Installation](#installation)
+  - [Caddy Reverse Proxy Example](#caddy-reverse-proxy-example)
 - [Upgrade Instructions](#upgrade-instructions)
   - [From Git](#from-git)
   - [Using the Installer](#using-the-installer)
@@ -41,6 +46,7 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Message composition:** the compose editor's automatic line-wrap column now defaults to **72** instead of 79, and 72 is offered as the recommended choice in the compose Advanced Options. Wrapping at 72 leaves room for quote-attribution prefixes (for example ` AB> `) so that quoted reply lines stay within the 79-column width that FidoNet readers expect. The 79-column option is still available for users who prefer it, and anyone who has already chosen a wrap width keeps their setting.
 - **Draft handling on send:** when a message is sent successfully from the web compose page, the draft it was composed from is now deleted automatically — including a draft that was only ever created by the 2-minute auto-save. Previously an auto-saved draft could be left behind after the message had already gone out, cluttering the drafts list.
 - **Draft handling on send:** a failed send (validation error, server error, or a netmail attachment upload failure) no longer silently disables auto-save for the rest of the editing session; the auto-save timer is restored so continued edits keep being saved.
+- **Bulk delete on the Drafts tab:** the netmail page's **Select** button now works on the **Drafts** tab. Previously the drafts list rendered no selection checkboxes at all, so multi-select and the **Delete Selected** action were unavailable there — you could only delete drafts one at a time. Selecting drafts and choosing Delete Selected now removes them together via a new `POST /api/messages/drafts/bulk-delete` endpoint (each delete is scoped to the signed-in user).
 - **Admin BBS Settings:** the **Admin -> BBS Settings** page is now organized into four tabs: **System & Features**, **Credit System**, **Tag Lines**, and **Registration Screening**. All settings and their save buttons are unchanged; they are only regrouped so the page is shorter and easier to navigate.
 - **Navbar active section indicator:** the web navigation bar now marks the section for the page you are on: the matching top-level menu item is shown in bold with a short underline bar beneath it, in the navigation link colour of whatever theme is active. The section is worked out from the page URL, so a page with no menu entry of its own still highlights its parent — a message thread or the compose page marks **Messaging**, and a door launcher marks **Doors**.
 - **Navbar active section indicator:** the **Files** menu's new-files cue is now shown on the file icon only. Previously an incoming file also turned the word "Files" yellow, which looked like the active-section highlight. The file icon and the Files link inside the dropdown still turn yellow; only the top-level text label no longer does.
@@ -57,12 +63,14 @@ Make sure you have a current backup of your database and files before upgrading.
 - **AreaFix reply sync:** inbound AreaFix / FileFix area-list replies received over an **authenticated (secure) BinkP session** are now synced into the local `echoareas` / `file_areas` tables automatically as packets are processed. Replies arriving over an insecure session, or whose packet origin does not match the configured uplink address, are ignored.
 - **AreaFix reply sync:** **Admin → AreaFix** gains a **Sync Areas to Local BBS** button on the latest-reply preview, backed by a new `POST /api/admin/areafix/sync-latest` endpoint, for manually syncing the most recent area list on demand.
 - **AreaFix reply sync:** box-art / decorative-line detection in the parser no longer discards area rows whose description contains accented UTF-8 characters.
+- **BinkP schedule status panel:** the BinkP status view in the admin **System Information** area no longer breaks when an uplink's poll schedule has extra or irregular whitespace between its cron fields. Such a schedule previously showed **next poll: Unknown**, and a badly-formed field (for example a stray `/` or an empty step) could make `GET /api/binkp/status` return HTTP 500 so the whole panel failed to load. The schedule string is now split the same way the rest of the scheduler splits it, so leading, trailing, and repeated whitespace are tolerated.
 
 ### Terminal Server
 
 - **Registration house rules:** the terminal server's **Register new account** flow now shows the house rules in a paged box and requires the prospective user to type `YES` to accept them before any account details are collected. Declining aborts registration. Custom house rules from **Admin -> Appearance -> Content -> House Rules** are shown when set; otherwise the built-in default rule set is used. The browser registration page already linked to the same rules.
 - **Full-screen editor flicker:** the terminal server's full-screen message editor (used automatically when the terminal has 15 or more rows) no longer erases and repaints the entire screen after every keystroke. Typing within a line now updates only that line, cursor movement emits only a cursor move, and structural edits repaint just the text area — borders and the footer stay put. This removes the constant blue-background blink that was visible while composing, especially on larger terminals or higher-latency connections. Terminals with ANSI colour disabled keep the previous full-redraw behaviour. Fixes issue #432.
 - **CP437 login ANSI art:** the ANSI login screen (`ansi_prompt` display mode) now accepts `.ans` files saved in Code Page 437 by DOS / Synchronet tools. The high-byte box-drawing and block characters are converted to UTF-8 for display, and a trailing SAUCE / EOF record is stripped. Previously these bytes rendered as replacement characters, and the admin appearance editor could not load or save such art.
+- **Message body escape-sequence filtering (security fix, GHSA-4225-c933-76f3):** echomail and netmail bodies, kludge lines, subjects, and author names are now stripped of terminal control sequences before being shown to a Telnet or SSH reader. Previously a message containing raw ANSI/VT escape codes could move the reader's cursor, repaint or erase their screen, spoof displayed content, and — on terminal emulators that honour them — set the window title, write the clipboard, or inject input via an answerback query. Because echomail is FidoNet-federated, such a message could originate from any user on any connected node. ANSI colour (SGR) codes are preserved; cursor positioning, screen clears, and OSC/DCS sequences are removed, so genuine ANSI-art messages keep their colours but lose absolute cursor placement when read on a terminal.
 
 ### Door Games
 
@@ -87,6 +95,10 @@ Make sure you have a current backup of your database and files before upgrading.
 
 - **Community mods list:** a new `docs/MODS.md` file is a curated list of third-party mods and extensions for BinktermPHP, linked from the Customization section of the README. It seeds with two mods by TheWebExpert: the Door Button Filter Mod (category filter bar on `/games`) and the Echo Area Button Mod (network-filter and quick-action bar on `/echolist`). Contributors add their own mods by pull request. Listed mods are maintained by their individual authors and have not necessarily been reviewed or tested by the BinktermPHP maintainer; review a mod's source before installing it.
 
+### Installation
+
+- **Caddy reverse proxy example:** the Caddy site block in `docs/INSTALL.md` now wraps the `/ws` (realtime WebSocket) and `/dosdoor` (DOS door bridge) proxies in their own `handle` blocks. In the previous example these were bare `reverse_proxy` directives; mixed in with the `handle` blocks used for the rest of the site they were shadowed by the catch-all handler, so WebSocket requests fell through to PHP and stalled while holding the per-user session lock, making every following page load hang for several seconds. If you copied the old block, update your `Caddyfile` to match.
+
 ---
 
 ## Web Interface
@@ -104,6 +116,14 @@ The web compose page auto-saves an in-progress netmail or echomail message as a 
 - On a successful send, the compose page tells the server which draft the message came from, and the server deletes it. This covers a draft you opened and finished, a draft you saved manually, and a draft that only exists because the auto-save timer fired while you were writing. If the compose page cannot identify a specific draft, the server removes the most recent draft that matches the message's area (echomail) or recipient (netmail) and subject. Previously an auto-saved draft was frequently left behind after its message had already been sent.
 - The compose page now waits for an in-flight auto-save to finish before sending, instead of cancelling it. Cancelling it client-side did not stop the save from completing on the server, which is how the leftover drafts were being created.
 - If a send fails — a validation error, a server error, or (for netmail) an attachment that fails to upload — the two-minute auto-save timer is now restarted when the form is re-enabled. Before, a failed send left auto-save switched off for the rest of the session, so later edits were not being saved until the page was reloaded.
+
+### Bulk Delete on the Drafts Tab
+
+The netmail page (`/netmail`) has a **Select** button that turns on a column of checkboxes so you can act on several messages at once. It worked on the All, Unread, Sent, and Saved tabs, but the **Drafts** tab rendered its own table with no checkboxes, so turning on Select did nothing there and drafts could only be removed one at a time with the per-row trash button.
+
+The Drafts tab now renders the same selection checkboxes and a select-all control. With one or more drafts selected, **Delete Selected** removes them in a single step, after a confirmation prompt. The list then reloads.
+
+This is backed by a new endpoint, `POST /api/messages/drafts/bulk-delete`, which takes `{ "message_ids": [ ... ] }` and deletes only drafts owned by the requesting user; IDs that belong to someone else or no longer exist are skipped. See `docs/API.md` for the full contract.
 
 ### Admin BBS Settings
 
@@ -231,6 +251,16 @@ The endpoint finds the most recent incoming area-list reply from that uplink, pa
 
 This change bumps the service-worker cache version. Users should hard-reload the admin interface, or clear the browser and service-worker cache, so the updated AreaFix page and its new button load.
 
+### BinkP Schedule Status Panel
+
+The admin **System Information** area shows a BinkP status panel, fed by `GET /api/binkp/status`, that lists each configured uplink with its poll schedule, last poll time, and computed next poll time. The next poll time is worked out by reading the uplink's `poll_schedule` — a five-field cron expression such as `0 */4 * * *` — and finding the next minute that matches.
+
+The routine that computes the next poll time split the schedule on single spaces only. A schedule that is functionally correct but formatted with a tab, a double space, or a leading or trailing space between fields therefore produced the wrong number of parts and the next poll time could not be computed. On the panel this appeared as **next poll: Unknown**, even though the same schedule polled correctly, because every other part of the scheduler already tolerates that whitespace.
+
+A separate consequence: a schedule field that is malformed rather than just oddly spaced — for example a bare `/`, or a step of zero like `*/0` — could raise a PHP error while the panel was being built. That error was not caught by the status route, so `GET /api/binkp/status` returned HTTP 500 and the whole panel failed to render.
+
+The schedule string is now tokenised with the same whitespace-normalising split the rest of the scheduler uses, so irregular spacing between fields is accepted and the next poll time is computed for any schedule that the scheduler itself accepts. A schedule that was showing **Unknown**, or a panel that was failing to load with a 500, should display correctly after upgrading without any change to the schedule itself.
+
 ## Terminal Server
 
 ### Registration House Rules
@@ -259,6 +289,34 @@ When the login screen display mode is set to **ANSI prompt**, the uploaded `.ans
 Those raw CP437 bytes are not valid UTF-8. When passed through template output they were rejected by `htmlspecialchars()` and every affected character was replaced with the Unicode replacement character, corrupting the art. Files that ended with a SAUCE metadata record (introduced by an `0x1A` EOF byte) also had that record passed straight through.
 
 `AppearanceConfig::getLoginScreenAnsi()` now truncates the content at the `0x1A` delimiter to drop any EOF / SAUCE block, and converts non-UTF-8 content from CP437 to UTF-8 with `iconv()` (falling back to `mb_convert_encoding()`), matching how shell art is already handled elsewhere. `AdminDaemonServer::getAppearanceConfig()` performs the same conversion before returning the JSON payload, so the **Admin -> Appearance** editor can load, edit, and save CP437 ANSI art without encoding errors.
+
+### Message Body Escape-Sequence Filtering
+
+This release fixes a stored terminal-escape-injection vulnerability, tracked as **GHSA-4225-c933-76f3** (severity: medium). It affects the Telnet and SSH terminal server; the browser interface was never exposed, because HTML output escapes these bytes.
+
+#### The problem
+
+A FidoNet message body is stored and later displayed to a terminal reader with very little transformation. When the reader opened an echomail or netmail message over Telnet or SSH, the terminal server passed the body through a word-wrapper (or the Markdown/StyleCodes renderer) and then a character-set conversion, and wrote the result straight to the socket. None of those steps removed ANSI/VT control sequences that were already in the body.
+
+An ANSI/VT terminal interprets escape sequences in the byte stream as commands. A message body could therefore contain sequences that:
+
+- move the cursor, scroll the screen, or clear regions of it, to garble or hide other content;
+- redraw parts of the screen to impersonate a system prompt or another user's message (display spoofing);
+- on emulators that honour them, set the terminal window title, write to the system clipboard (OSC 52), or issue a device-status / answerback query whose reply is injected back into the session as if the user had typed it.
+
+Any account that can post a message could target any reader. Because echomail is federated across FidoNet, a crafted body could also arrive from a user on any connected uplink — the attacker did not need an account on your board. The subject line and author name shown in the message header and message list were exposed the same way. This is terminal manipulation on the reader's client, not code execution on the server.
+
+#### The fix
+
+A new filter, `BinktermPHP\TerminalTextSanitizer`, is applied to untrusted text on every terminal read path — the echomail and netmail message viewers (body and kludge lines), quoted and forwarded text placed in the composer, and the message-list rows and header fields. The same filter replaces the narrower escape strip that was already present on the MeshCore / PacketBBS radio renderer.
+
+The filter keeps SGR (colour and text-style) sequences — `ESC [ … m` — and the TAB, CR, and LF whitespace controls. Everything else is removed: cursor movement, erase and scroll commands, mode changes, OSC and DCS strings, character-set designation, other escape sequences, and stray C0/C1 control bytes.
+
+The visible effect for readers is that message colours are unchanged, but a message that relied on cursor positioning to draw ANSI art (as opposed to plain coloured text) will show that art without the positioning when read on a terminal. This path never rendered positioned art correctly in any case.
+
+#### If you run a public terminal server
+
+Upgrade promptly; there is no workaround short of disabling terminal access to messages. Filtering happens at display time, so it also covers messages that are already stored.
 
 ## Door Games
 
@@ -343,6 +401,42 @@ The list launches with two entries, both by TheWebExpert (The Adventure BBS, 227
 Both use the `templates/custom/header.insert.twig` customization hook.
 
 Contributors with a mod to share add a section to `docs/MODS.md` by pull request against the `claudesbbs` branch, following the existing entry format. Mods in the list are written and maintained by their individual authors and **have not necessarily been reviewed or tested by the BinktermPHP maintainer** — review a mod's source code before installing it on your system.
+
+## Installation
+
+### Caddy Reverse Proxy Example
+
+The bare-metal install guide, `docs/INSTALL.md`, includes an example Caddy site block. That block uses `handle` blocks to route requests, and in the previous version the two supporting proxies were written as plain directives outside any `handle` block:
+
+```caddyfile
+reverse_proxy /ws 127.0.0.1:6010 { ... }
+reverse_proxy /dosdoor 127.0.0.1:6001 { ... }
+```
+
+In Caddy, a bare `reverse_proxy` with a path matcher and a `handle` block are different directive types, and when both appear in one site the `handle` blocks take over routing. The bare `/ws` and `/dosdoor` proxies were shadowed by the catch-all `handle` that forwards everything else to PHP. As a result:
+
+- The realtime WebSocket connection (`/ws`, served by `scripts/realtime_server.php`) was sent into PHP instead of the WebSocket daemon. The request never completed, and it held the per-user PHP session lock while it hung, so every other request for that user — normal page loads — blocked for several seconds behind it.
+- The DOS door bridge (`/dosdoor`, served by the multiplexing server) was likewise routed to PHP and did not work.
+
+The example now wraps both proxies in their own exact-match `handle` blocks so they are matched and short-circuited before the PHP fallback:
+
+```caddyfile
+handle /ws {
+    reverse_proxy 127.0.0.1:6010 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}
+
+handle /dosdoor {
+    reverse_proxy 127.0.0.1:6001 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+    }
+}
+```
+
+If you built your `Caddyfile` from the earlier example and see slow page loads or a non-working realtime connection, copy the updated `/ws` and `/dosdoor` blocks from `docs/INSTALL.md` and reload Caddy. Nginx and Apache examples in the guide are unaffected.
 
 ## Upgrade Instructions
 
