@@ -114,8 +114,8 @@ class AreaFixManager
                 continue;
             }
 
-            // Skip lines starting with error or percent command prefixes
-            if (str_starts_with($trimmed, '-ERR') || str_starts_with($trimmed, '+ERR') || str_starts_with($trimmed, '%')) {
+            // Skip lines starting with error, percent, command, or result prefixes
+            if (str_starts_with($trimmed, '-ERR') || str_starts_with($trimmed, '+ERR') || str_starts_with($trimmed, '%') || preg_match('/^(?:command|result|your\s+(?:areafix|filefix))\s*[:\s]/i', $trimmed)) {
                 continue;
             }
 
@@ -173,17 +173,23 @@ class AreaFixManager
 
             $tag = strtoupper($parts[0]);
 
-            // List of words that appear in receipts, headers, or English sentences and cannot be area tags
+            // List of words that appear in receipts, headers, help texts, or English sentences and cannot be area tags
             $ignoredTags = [
                 'AREA', 'FTN', 'FOLLOWING', 'FOLLOWS', 'ORIGINAL', 'STATUS', 'MESSAGE',
                 'TEXT', 'COMMAND', 'COMMANDS', 'REQUEST', 'NOTE', 'NOTES', 'DATE',
                 'COST', 'FLAGS', 'ORIGIN', 'DEST', 'INTL', 'REPLYADDR', 'MSGID',
                 'CHRS', 'PID', 'TZUTC', 'THIS', 'THAT', 'THERE', 'HERE', 'YOUR',
-                'PLEASE', 'BELOW', 'REPLY', 'RESULT', 'RESULTS', 'HELP'
+                'PLEASE', 'BELOW', 'REPLY', 'RESULT', 'RESULTS', 'HELP',
+                'WITHIN', 'LINE', 'LINES', 'ABILITY', 'AFTER', 'BEFORE', 'DURING',
+                'EACH', 'MORE', 'SOME', 'SUCH', 'BUNDLED', 'PLUS', 'MINUS',
+                'LINKED', 'UNLINKED', 'ELEMENTS', 'DONE', 'PARENTHESIS', 'COMPLEX',
+                'PASSWORD', 'RECENT', 'SEARCH', 'SEARCHING', 'DOWNLINK', 'UPLINK',
+                'OPTIONS', 'OPTION', 'CHANGING', 'SPECIFIED', 'NUMBER', 'DAYS',
+                'MESSAGES', 'WINDOWS', 'LINUX', 'FILE', 'FILES', 'BASE', 'BASES'
             ];
 
             // Validate tag pattern: uppercase letters, digits, underscore, hyphen, dot; minimum 2 chars
-            if (in_array($tag, $ignoredTags, true) || !preg_match('/^[A-Z0-9_\-\.]{2,}$/', $tag) || preg_match('/^\.+$/', $tag)) {
+            if (in_array($tag, $ignoredTags, true) || !preg_match('/^[A-Z0-9_\-\.]{2,}$/', $tag) || preg_match('/^\.+$/', $tag) || is_numeric($tag)) {
                 continue;
             }
 
@@ -485,7 +491,22 @@ class AreaFixManager
             return false;
         }
 
-        if (str_contains($body, '<-- COMMAND PROCESSED') || str_contains($body, '[ BEGIN MESSAGE ]') || str_contains($body, 'Here are the list of commands') || str_contains($body, 'original message text') || str_contains($body, 'rescanned')) {
+        // Help text markers: AreaFix/FileFix instructions, command listings, help manuals
+        if (preg_match('/(?:help\s+included|what\s+is\s+(?:areafix|filefix)|(?:areafix|filefix)\s+help|(?:areafix|filefix)\s+commands|how\s+to\s+use\s+(?:areafix|filefix)|complex\s+boolean\s+searching|changing\s+rescan\s+options)/i', $body)) {
+            return false;
+        }
+
+        // Rescan status without an area list
+        if (preg_match('/rescanned\s+\d+\s+messages/i', $body) && !preg_match('/(?:list\s+of\s+(?:all\s+)?areas|available\s+(?:echo)?areas)/i', $body)) {
+            return false;
+        }
+
+        // Standard receipts and logs
+        if (stripos($body, '<-- COMMAND PROCESSED') !== false
+            || stripos($body, '[ BEGIN MESSAGE ]') !== false
+            || stripos($body, 'Here are the list of commands') !== false
+            || stripos($body, 'original message text') !== false
+            || stripos($body, 'Unknown echo area') !== false) {
             return false;
         }
 
