@@ -8,8 +8,24 @@ Make sure you have a current backup of your database and files before upgrading.
 - [Messaging](#messaging)
   - [Date Display Preferences](#date-display-preferences)
   - [Message Search Scoped by Network and Interest](#message-search-scoped-by-network-and-interest)
+- [AreaFix / FileFix](#areafix-filefix)
+  - [Structural Reply Parsing Across More Hub Mailers](#structural-reply-parsing-across-more-hub-mailers)
+  - [Mandatory Preview Before Syncing Areas](#mandatory-preview-before-syncing-areas)
+  - [Data-Driven Grammar Definitions](#data-driven-grammar-definitions)
+  - [Per-Uplink Format Memory](#per-uplink-format-memory)
 - [Administration](#administration)
   - [Fixed: user-manager.php create Command](#fixed-user-managerphp-create-command)
+- [AreaFix / FileFix](#areafix--filefix)
+  - [Automatic Area Sync on Reply Now Opt-In](#automatic-area-sync-on-reply-now-opt-in)
+  - [Fixed: AreaFix Sync Set an Override Address on Echo Areas](#fixed-areafix-sync-set-an-override-address-on-echo-areas)
+- [Web Doors](#web-doors)
+  - [Longer Browser Caching for Door Assets](#longer-browser-caching-for-door-assets)
+  - [RLogin Door Asset Sizes Stored in the Database](#rlogin-door-asset-sizes-stored-in-the-database)
+- [MeshCore](#meshcore)
+  - [Radio Settings Link on the Dashboard](#radio-settings-link-on-the-dashboard)
+- [Networks](#networks)
+  - [SysopNet Added to the Networks List](#sysopnet-added-to-the-networks-list)
+  - [Networks Listed Alphabetically](#networks-listed-alphabetically)
 - [Security](#security)
   - [Secure Flag on Session Cookies](#secure-flag-on-session-cookies)
 - [Upgrade Instructions](#upgrade-instructions)
@@ -24,9 +40,35 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Date display preferences:** users and sysops can now choose between relative timestamps ("4d ago") and exact date/time for message lists and headers, and choose whether echomail is ordered and displayed by received date or written date.
 - **Message search scoped by network and interest:** searching for messages from the Echo Areas page now respects the network and interest filters selected there, and searching while browsing a single interest on the Echomail page now stays within that interest's echo areas, instead of always searching every echo area.
 
+### AreaFix / FileFix
+
+- **Structural reply parsing across more hub mailers:** AreaFix and FileFix replies are now parsed by recognizing the concrete layout each hub mailer actually sends — Mystic BBS/MBSE command blocks, delimited and columnar tables, BBBS/Li6-style quoted address lists, and HPT-style flag-prefixed quoted lists — instead of scanning for keywords. Real echo areas with common names such as `LINUX`, `WINDOWS`, or `BASE` are no longer mistaken for header text or help output.
+- **Mandatory preview before syncing areas:** clicking "Sync Areas to Local BBS" (from the latest reply, or from any individual incoming message in the Message History table) now shows a preview of exactly which areas will be created, reactivated, deactivated, or left unchanged. Nothing is written to the database until this preview is explicitly confirmed.
+- **Data-driven grammar definitions:** a new **Admin -> Area Management -> AreaFix Grammars** page lets a sysop teach AreaFix a new hub reply format without a code change, either by hand or by pasting a sample reply and asking the built-in AI assistant to suggest one. Suggestions are always added disabled for review before saving.
+- **Per-uplink format memory:** BinktermPHP now remembers which reply format last matched each hub's confirmed sync, tries that format first on the hub's next reply, and flags it on the preview screen if the format changes unexpectedly. The remembered format for each uplink can be viewed, forced, or cleared from **Admin -> BBS Settings -> BinkP Uplinks -> Edit Uplink**.
+
 ### Administration
 
 - **Fixed `scripts/user-manager.php create`:** the operator CLI's `create` command failed on PostgreSQL with `column "is_active" is of type boolean but expression is of type integer`, because it inserted the literal `1` instead of a boolean. This is now fixed.
+
+### AreaFix / FileFix
+
+- **Automatic area sync on reply is now opt-in:** receiving an AreaFix/FileFix reply from a hub that looks like an area list no longer automatically creates or activates local echo areas / file areas by default. Set `AREAFIX_AUTOIMPORT_ENABLED=true` in `.env` to restore the previous automatic behavior.
+- **Fixed: AreaFix sync set an override address on echo areas:** syncing areas from a hub's AreaFix reply filled in the echo area's **Uplink Address** ("Override Uplink FidoNet address") field on every area it created or touched. The sync no longer sets it, and deactivating areas missing from the hub's list is now scoped by network domain and tag instead of by that address.
+
+### Web Doors
+
+- **Longer browser caching for door assets:** icons and screenshots served from `/door-assets/` now use `Cache-Control: public, max-age=604800, stale-while-revalidate=86400` (up from a 24-hour max-age), plus ETag/Last-Modified conditional requests, so repeat visits reload door pages faster and generate less server load.
+- **RLogin door asset sizes stored in the database:** icon and screenshot byte sizes for RLogin doors are now stored alongside the image data instead of being recomputed on every request, reducing memory overhead when serving those assets.
+
+### MeshCore
+
+- **Radio settings link on the dashboard:** the PacketBBS Nodes card on the main dashboard now includes a "My MeshCore radios" link that opens the MeshCore tab of your user settings, where you manage your radios.
+
+### Networks
+
+- **SysopNet added to the networks list:** SysopNet (zone 23, hub 23:1/1), an FTN for sysops run by sysops, is now registered automatically on upgrade, so it appears in **Admin -> Networks** without being created by hand.
+- **Networks listed alphabetically:** the network list in **Admin -> Networks** and the network dropdown when editing an uplink are now sorted purely by name.
 
 ### Security
 
@@ -51,6 +93,55 @@ The Echo Areas page lets you filter the area list down to one or more networks a
 
 On the Echomail page, searching while browsing a single interest under the Interests tab is likewise scoped to that interest's echo areas. Searching from a specific echo area continues to scope to that single area, as before, taking priority over any network or interest scope.
 
+## AreaFix / FileFix
+
+### Structural Reply Parsing Across More Hub Mailers
+
+AreaFix and FileFix replies from a hub are parsed by matching the actual layout the hub's mailer software produces, rather than by scanning line-by-line for known words and phrases. The parser recognizes:
+
+- Mystic BBS and MBSE `Command:`/`Result:` blocks, including stacked multi-command replies and `%LIST`/`%QUERY`/`%LINKED`/`%UNLINKED` result listings.
+- Colon- and pipe-delimited tables (Husky, Clearing Houz, FastEcho, FrontDoor, InterMail).
+- Columnar and dotted-leader tables (HPT, Husky), including table headers that name the tag column something other than the literal word "Area" (for example "Message area").
+- BBBS/Li6-style quoted address lists (`+TAG (address) "description"`), including descriptions that wrap onto a continuation line and a single reply that lists both echo areas and file areas.
+- HPT-style flag-prefixed dotted-leader lists with quoted descriptions (`*S   TAG ....... "description"`).
+- As a last resort, a conservative bare `TAG   Description` line matcher for hub replies that don't match any of the above, which never marks a matched area as subscribed on its own.
+
+Because this approach recognizes real structure instead of matching words, an echo area named the same as an ordinary English word or a common piece of software (`LINUX`, `WINDOWS`, `BASE`, and similar) is preserved correctly instead of being mistaken for a header, a help topic, or unrelated prose.
+
+A Mystic BBS/MBSE `%QUERY` reply that lists both linked and unlinked areas in a single block, with individual rows explicitly annotated `(linked)`, `(unlinked)`, or `(not linked)`, now honors each row's own annotation instead of marking every row in the block the same way.
+
+### Mandatory Preview Before Syncing Areas
+
+Previously, clicking "Sync Areas to Local BBS" on the AreaFix / FileFix Manager page applied the parsed area list to your local echo areas or file areas immediately, with no chance to review it first. It now opens a preview dialog instead, and nothing is written to your database until you explicitly confirm it there. This preview is available in two places: from the "Latest Reply" panel's sync button, and per-message from a sync button next to each incoming reply in the Message History table, so you can also review and apply an older reply without it needing to still be the most recent one.
+
+The preview lists every area found in the reply as a row with a checkbox, its tag, its description, and a status badge:
+
+- **New** — the area doesn't exist locally yet and will be created.
+- **Reactivate** — the area exists but is currently inactive and will be turned on.
+- **Deactivate** — the area is currently active and the reply says to unsubscribe from it.
+- **Updated** — the area's activation state isn't changing, but its description will be filled in or updated to match the hub's reply.
+- **Unchanged** — nothing about the area differs from what the reply says; selecting it has no effect.
+
+For an "Updated" row, the description cell shows your current description struck through above the incoming one when it will actually be replaced. A description is only ever replaced when your current one is empty, an auto-generated placeholder, or you've explicitly selected that row for sync (see below) — a real, sysop-set description is never silently overwritten. If the hub's reply lists a different description for an area whose own real description would otherwise be left alone, the preview still shows what the hub sent underneath it, so the mismatch doesn't go unnoticed just because it's not required to be applied.
+
+Every row starts checked except a genuine no-op "Unchanged" row — including every "New", "Reactivate", "Deactivate", and "Updated" row, so the normal case (review, then confirm) still applies everything in one click. Use the checkboxes, or the "Select All" / "Select None" buttons above the list, to apply only a subset instead. Confirming a checked "Updated" row is what actually lets a hub's description win over your own where it otherwise wouldn't — uncheck that specific row first if you'd rather keep your own description for that one area.
+
+### Data-Driven Grammar Definitions
+
+The structural parser recognizes several hub mailer formats out of the box, but a new or unusual format can still come back as an empty reply. A new admin page, **Admin -> Area Management -> AreaFix Grammars** (`/admin/areafix-grammars`), lets a sysop describe a new format as data instead of waiting for a code change:
+
+- Each grammar definition is a JSON object specifying a header pattern (to detect the format), a per-row pattern (to extract the area tag, description, and status), and how status text maps to subscribed/unsubscribed/available. The full schema is documented on the page and in `docs/AreaFix.md`.
+- A **Paste from AreaFix Message** button lets you paste the raw text of a hub reply and have the configured AI provider suggest a grammar definition for it. The suggestion is always added disabled, and every regex in it is validated, so nothing starts matching mail until you review and explicitly enable it.
+- A **Populate from Example** button loads a starter definition from `config/areafix_grammars.json.example`, which ships disabled and has no effect until you edit and save it.
+- A **Test Against Sample** button lets you paste a sample reply and see exactly what your grammars (saved or not, enabled or not) would extract from it before you save — which format matched and every tag, description, and action it found. Nothing is written to disk by this button.
+- Grammars you define are tried after the built-in structural formats and before the last-resort freeform line matcher, in the order they appear on the page.
+
+### Per-Uplink Format Memory
+
+A given hub's AreaFix/FileFix robot always replies in the same format, so BinktermPHP now remembers which format matched the last confirmed sync for each uplink and robot (AreaFix and FileFix are tracked separately). On the next reply from that uplink, the remembered format is tried first, and if a reply no longer matches it, the sync preview shows a warning naming the old and new format — a concrete signal that the hub's mailer software may have changed or been reconfigured.
+
+The remembered format for each uplink is visible and directly editable from **Admin -> BBS Settings -> BinkP Uplinks -> Edit Uplink**: a "Remembered Reply Format" panel shows the current format for AreaFix and FileFix, with buttons to force it to a specific format or clear it. Clearing is useful after you've confirmed a hub's format really did change; forcing is useful to pre-seed a known format for a brand-new uplink before its first reply arrives.
+
 ## Administration
 
 ### Fixed: user-manager.php create Command
@@ -62,6 +153,69 @@ SQLSTATE[42804]: column "is_active" is of type boolean but expression is of type
 ```
 
 This was left over from the project's earlier SQLite-based schema, where `is_active` accepted an integer. The command now inserts a proper boolean and reads back the new user's id via `RETURNING id` instead of `lastInsertId()`. If you were creating operator accounts by editing the database directly to work around this, you can now use `scripts/user-manager.php create` normally again.
+
+## AreaFix / FileFix
+
+### Automatic Area Sync on Reply Now Opt-In
+
+When your BBS receives a netmail reply from a hub's AreaFix or FileFix robot that looks like an area list (for example, the response to a `%LIST` or `%QUERY` command), BinktermPHP can automatically create matching `echoareas` or `file_areas` rows and activate them, using the descriptions the hub reports.
+
+Starting with this release, that automatic sync is **disabled by default**. Incoming AreaFix/FileFix replies are still stored and viewable as normal netmail; they simply no longer create or activate local areas on their own. Sysops who want to review and apply a hub's area list continue to do so from **Admin -> AreaFix / FileFix**, using the **Sync to Echo Areas** button on a parsed reply.
+
+If you relied on the previous automatic behavior — for example, to pick up new areas from your hub without visiting the admin page — set the following in `.env` to restore it:
+
+```
+AREAFIX_AUTOIMPORT_ENABLED=true
+```
+
+### Fixed: AreaFix Sync Set an Override Address on Echo Areas
+
+Each echo area has an optional **Uplink Address** field in **Admin -> Echo Areas**, described as "Override Uplink FidoNet address". When it is empty, echomail for that area is sent to the uplink configured for the area's network. When it is set, echomail for that area is sent to that address instead, which is only wanted when a sysop deliberately routes one area differently.
+
+Syncing areas from an AreaFix reply (the **Sync to Echo Areas** button, or automatic sync when `AREAFIX_AUTOIMPORT_ENABLED=true`) was filling this field in with the hub's address on every area it created, and on existing areas where it was empty. Newly created echo areas therefore appeared to have an override that nobody had set. The sync no longer writes this field.
+
+When the *deactivate missing* option is used, it now deactivates active areas in the same network domain whose tag is not in the hub's list. Previously it only considered areas whose Uplink Address matched the hub, which would have skipped areas that have no override.
+
+Echo areas that were already given an Uplink Address by an earlier sync keep it, because it cannot be distinguished from an address a sysop entered on purpose. If you see an override you did not intend, open the area in **Admin -> Echo Areas** and clear the **Uplink Address** field.
+
+## Web Doors
+
+### Longer Browser Caching for Door Assets
+
+Door icons and screenshots served through `/door-assets/{doorid}/{asset}` — whether stored as files or as database blobs — now set:
+
+```
+Cache-Control: public, max-age=604800, stale-while-revalidate=86400
+```
+
+- **`max-age=604800`** (7 days, up from 1 day) tells the browser it can reuse a cached copy of the asset for up to a week without re-checking with the server.
+- **`stale-while-revalidate=86400`** (1 day) lets the browser keep serving its cached copy for up to a day past that while it revalidates in the background, instead of blocking the page on a fresh request.
+
+Requests also now include an `ETag` (and, for filesystem-backed assets, a `Last-Modified` header), so once the 7-day cache does expire, the browser can send a conditional request and get a lightweight `304 Not Modified` response instead of re-downloading the asset if it hasn't changed.
+
+Door game listing pages also load door icons with `loading="lazy"`, so icons off-screen are not fetched until the user scrolls to them.
+
+If you update a door's icon or screenshot file, its changed modification time (or content hash, for database-stored assets) invalidates the old cached copy automatically.
+
+### RLogin Door Asset Sizes Stored in the Database
+
+RLogin doors store their icon and screenshot images as binary data directly in the `rlogin_doors` table, since these doors have no directory on disk. Their byte sizes are now stored in new `icon_size` and `screenshot_size` columns on that table, populated whenever an icon or screenshot is uploaded through **Admin -> RLogin Doors**. Existing icons and screenshots are backfilled automatically by the upgrade migration, so their sizes are recorded immediately without needing to re-upload anything.
+
+## MeshCore
+
+### Radio Settings Link on the Dashboard
+
+The PacketBBS Nodes card on the main dashboard, shown when MeshCore is enabled, now has a "My MeshCore radios" link beside "View all nodes". It opens **Settings** directly on the **MeshCore** tab, where you can add, edit, and remove your own radios. The settings page also accepts `/settings#meshcore` as a direct link to that tab.
+
+## Networks
+
+### SysopNet Added to the Networks List
+
+The upgrade migration registers SysopNet (domain `sysopnet`, https://sysopnet.com) in the networks table, using the real-name posting policy and CP437 as the default code page. You can review or change these in **Admin -> Networks**. To join SysopNet you still need to request a node at sysopnet.com/node-request/ and add the uplink details your hub gives you. If a network with the domain `sysopnet` already exists, the migration leaves it unchanged.
+
+### Networks Listed Alphabetically
+
+The network list in **Admin -> Networks**, and the network dropdown in the uplink editor under **Admin -> BBS Settings -> BinkP Uplinks**, previously showed all built-in networks first and then any other networks (such as locally created ones, or SysopNet) in a separate group below them. They are now sorted by name in a single list, regardless of whether a network is built in.
 
 ## Security
 
