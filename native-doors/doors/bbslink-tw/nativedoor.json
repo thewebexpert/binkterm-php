@@ -1,0 +1,32 @@
+{
+    "type": "nativedoor",
+    "version": "1.0",
+    "game": {
+        "name": "TradeWars 2002 (BBSLink)",
+        "short_name": "TradeWars",
+        "author": "Gary Martin / Martech Software",
+        "version": "1.0",
+        "release_year": 1990,
+        "description": "The definitive space trading and combat strategy game. Trade commodities, colonize planets, and conquer sectors.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh tw {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
+}

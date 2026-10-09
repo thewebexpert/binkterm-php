@@ -35,10 +35,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libxml2-dev \
         libzip-dev \
         nodejs \
+        openssh-client \
         p7zip-full \
         postgresql-client \
         rsync \
         supervisor \
+        telnet \
         unzip \
         # DOSBox-X for DOS door support with headless operation
         dosbox-x \

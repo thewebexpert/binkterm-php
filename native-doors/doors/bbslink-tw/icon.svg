@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="twSpaceBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#020208" />
+      <stop offset="50%" stop-color="#080820" />
+      <stop offset="100%" stop-color="#01010a" />
+    </linearGradient>
+    <radialGradient id="nebulaGlow" cx="60%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#bf00ff" stop-opacity="0.4" />
+      <stop offset="50%" stop-color="#0066ff" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="planetGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#00ffff" />
+      <stop offset="40%" stop-color="#0055aa" />
+      <stop offset="80%" stop-color="#001a40" />
+      <stop offset="100%" stop-color="#000814" />
+    </radialGradient>
+    <linearGradient id="shipSteel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#b0c4de" />
+      <stop offset="80%" stop-color="#4682b4" />
+      <stop offset="100%" stop-color="#1e3f66" />
+    </linearGradient>
+    <linearGradient id="twGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5a6" />
+      <stop offset="40%" stop-color="#ffcc00" />
+      <stop offset="80%" stop-color="#cc8800" />
+      <stop offset="100%" stop-color="#885500" />
+    </linearGradient>
+    <filter id="thrusterGlow">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Frame -->
+  <rect x="8" y="8" width="496" height="496" rx="28" fill="#0b0e14" stroke="#1d456b" stroke-width="8" />
+  <rect x="20" y="20" width="472" height="472" rx="20" fill="url(#twSpaceBg)" stroke="#3a82c4" stroke-width="3" />
+
+  <!-- Deep Space Nebula Glow -->
+  <circle cx="300" cy="200" r="180" fill="url(#nebulaGlow)" />
+
+  <!-- Starfield -->
+  <g fill="#ffffff">
+    <circle cx="50" cy="80" r="1.5" opacity="0.8" />
+    <circle cx="120" cy="50" r="2" opacity="0.9" />
+    <circle cx="210" cy="70" r="1" opacity="0.5" />
+    <circle cx="430" cy="90" r="2" opacity="0.8" />
+    <circle cx="400" cy="160" r="1.5" opacity="0.7" />
+    <circle cx="70" cy="220" r="1" opacity="0.6" />
+    <circle cx="100" cy="340" r="2" opacity="0.8" />
+    <circle cx="440" cy="300" r="1.5" opacity="0.9" />
+    <circle cx="370" cy="360" r="1" opacity="0.5" />
+  </g>
+
+  <!-- Ringed Planet -->
+  <g transform="translate(340, 150)">
+    <!-- Back of Ring -->
+    <ellipse cx="0" cy="0" rx="90" ry="24" fill="none" stroke="#e0c068" stroke-width="6" opacity="0.5" transform="rotate(-20)" />
+    <!-- Planet Body -->
+    <circle cx="0" cy="0" r="45" fill="url(#planetGrad)" />
+    <!-- Front of Ring -->
+    <path d="M-84 30 A90 24 0 0 0 84 -30" fill="none" stroke="#ffe082" stroke-width="6" transform="rotate(-20)" />
+  </g>
+
+  <!-- Space Station Starbase in Distance -->
+  <g transform="translate(120, 140) scale(0.6)">
+    <circle cx="0" cy="0" r="30" fill="none" stroke="#00e5ff" stroke-width="4" filter="url(#thrusterGlow)" />
+    <circle cx="0" cy="0" r="10" fill="#ffffff" />
+    <line x1="-40" y1="0" x2="40" y2="0" stroke="#00e5ff" stroke-width="3" />
+    <line x1="0" y1="-40" x2="0" y2="40" stroke="#00e5ff" stroke-width="3" />
+  </g>
+
+  <!-- Player Battlecruiser / Merchant Freighter -->
+  <!-- Plasma Thruster Glow -->
+  <polygon points="170,290 200,380 230,290" fill="#00ffff" filter="url(#thrusterGlow)" />
+  <polygon points="282,290 312,380 342,290" fill="#00ffff" filter="url(#thrusterGlow)" />
+  <polygon points="185,290 200,350 215,290" fill="#ffffff" />
+  <polygon points="297,290 312,350 327,290" fill="#ffffff" />
+
+  <!-- Main Ship Hull -->
+  <polygon points="256,120 360,280 330,300 256,270 182,300 152,280" fill="url(#shipSteel)" stroke="#001830" stroke-width="4" />
+  <!-- Ship Center Cockpit & Panels -->
+  <polygon points="256,140 290,240 256,260 222,240" fill="#1c2b3d" stroke="#00ffff" stroke-width="2" />
+  <ellipse cx="256" cy="180" rx="14" ry="24" fill="#00ffff" filter="url(#thrusterGlow)" opacity="0.85" />
+  <!-- Wing Armor Cannons -->
+  <polygon points="152,280 140,250 160,240 175,275" fill="#2d4868" stroke="#0c1d2e" stroke-width="2" />
+  <polygon points="360,280 372,250 352,240 337,275" fill="#2d4868" stroke="#0c1d2e" stroke-width="2" />
+
+  <!-- Laser Blaster Beams -->
+  <line x1="140" y1="240" x2="110" y2="120" stroke="#ff0055" stroke-width="3" filter="url(#thrusterGlow)" />
+  <line x1="372" y1="240" x2="402" y2="120" stroke="#ff0055" stroke-width="3" filter="url(#thrusterGlow)" />
+
+  <!-- Title Banner Box -->
+  <rect x="36" y="405" width="440" height="75" rx="14" fill="#060c14" stroke="url(#twGold)" stroke-width="4" />
+  <rect x="42" y="411" width="428" height="63" rx="10" fill="#0b1726" />
+
+  <!-- Title Text -->
+  <text x="256" y="445" font-family="'Courier New', Courier, monospace, Impact, sans-serif" font-weight="900" font-size="32" fill="#ffd700" text-anchor="middle" letter-spacing="3" stroke="#000" stroke-width="2" filter="url(#thrusterGlow)">TRADEWARS</text>
+  <text x="256" y="468" font-family="'Courier New', Courier, monospace, sans-serif" font-weight="700" font-size="16" fill="#00e5ff" text-anchor="middle" letter-spacing="8">2002</text>
+</svg>

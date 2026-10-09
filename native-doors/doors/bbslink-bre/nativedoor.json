@@ -1,0 +1,32 @@
+{
+    "type": "nativedoor",
+    "version": "1.0",
+    "game": {
+        "name": "Barren Realms Elite (BBSLink)",
+        "short_name": "BRE",
+        "author": "Solar Realms / Amit Patel",
+        "version": "1.0",
+        "release_year": 1989,
+        "description": "Epic post-nuclear strategy wargame. Manage your barony, build nuclear missiles, and wage global war.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh bre {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
+}

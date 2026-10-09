@@ -1,0 +1,32 @@
+{
+    "type": "nativedoor",
+    "version": "1.0",
+    "game": {
+        "name": "Legend of the Red Dragon (BBSLink)",
+        "short_name": "LORD",
+        "author": "Robinson Technologies",
+        "version": "1.0",
+        "release_year": 1992,
+        "description": "The classic fantasy RPG. Slay the Red Dragon, flirt with Violet, and battle rival warriors across the realm.",
+        "players": "Multi-player",
+        "icon": "icon.jpg",
+        "screenshot": null
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh lord {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
+}

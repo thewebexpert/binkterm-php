@@ -118,6 +118,26 @@ mkdir -p \
 chown -R binkterm:binkterm /var/www/html/data /var/www/html/config /var/www/html/dosbox-bridge
 chmod -R 775 /var/www/html/data /var/www/html/config /var/www/html/dosbox-bridge
 
+# Ensure BBSLink dependencies and symlinks
+if ! command -v telnet >/dev/null 2>&1; then
+    echo "Telnet client missing; installing..."
+    apt-get update && apt-get install -y --no-install-recommends telnet && rm -rf /var/lib/apt/lists/*
+fi
+
+if [ -d /var/www/html/native-doors/doors/bbslinknative ]; then
+    for door_dir in /var/www/html/native-doors/doors/bbslink-*; do
+        [ -d "$door_dir" ] || continue
+        if [ ! -e "$door_dir/bbslink.sh" ] && [ -e /var/www/html/native-doors/doors/bbslinknative/bbslink.sh ]; then
+            ln -sf ../bbslinknative/bbslink.sh "$door_dir/bbslink.sh"
+            chown -h binkterm:binkterm "$door_dir/bbslink.sh" 2>/dev/null || true
+        fi
+        if [ ! -e "$door_dir/vars.sh" ] && [ -e /var/www/html/native-doors/doors/bbslinknative/vars.sh ]; then
+            ln -sf ../bbslinknative/vars.sh "$door_dir/vars.sh"
+            chown -h binkterm:binkterm "$door_dir/vars.sh" 2>/dev/null || true
+        fi
+    done
+fi
+
 # Activate optional daemons requested via ENABLE_* environment variables (set
 # in docker-compose.yml/docker-compose.override.yml -- Docker-only, never in
 # .env). Each daemon ships as a disabled-by-default template in
