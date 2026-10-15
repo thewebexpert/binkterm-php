@@ -46,6 +46,15 @@
         .bbs-shell-system-name {
             font-weight: bold;
             font-size: 1.1rem;
+            color: #fff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        .bbs-shell-system-name:hover {
+            color: #fff;
+            text-decoration: none;
+            opacity: 0.9;
         }
         .bbs-shell-section {
             flex: 1;
@@ -154,13 +163,13 @@
 <body class="bbs-menu-shell">
 
     <header class="bbs-shell-header">
-        <span class="bbs-shell-system-name">
+        <a href="/" class="bbs-shell-system-name" title="{{ system_name | e }}">
             {% if appearance.branding.logo_url %}
                 <img src="{{ appearance.branding.logo_url | e }}" alt="{{ system_name | e }}" style="max-height:32px;" class="me-1">
             {% else %}
                 {{ system_name }}
             {% endif %}
-        </span>
+        </a>
         <span class="bbs-shell-section">{% block section_title %}{% endblock %}</span>
         {% if current_user %}
             {% if credits_enabled %}

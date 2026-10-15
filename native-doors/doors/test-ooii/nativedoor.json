@@ -1,0 +1,33 @@
+{
+    "type": "nativedoor",
+    "version": "1.0",
+    "game": {
+        "name": "TEST: Operation Overkill II (Native PTY)",
+        "short_name": "TEST OOII",
+        "author": "Dust Bowl Software",
+        "version": "2.05",
+        "release_year": 1993,
+        "description": "Experimental Native Door bridge to local OOII server over PTY to compare ANSI rendering and performance against RLogin.",
+        "players": "Multi-player",
+        "icon": "icon.jpg",
+        "screenshot": null
+    },
+    "door": {
+        "executable": "oo2_bridge.py",
+        "launch_command": "python3 oo2_bridge.py {dropfile} {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": true,
+        "time_per_day": 60,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    },
+    "mobile_layout": "ooii"
+}
