@@ -9,6 +9,7 @@ use BinktermPHP\Auth;
 use BinktermPHP\Config;
 use BinktermPHP\Database;
 use BinktermPHP\I18n\Translator;
+use BinktermPHP\Terminal\ConnectionRateLimiter;
 use BinktermPHP\UserMeta;
 use BinktermPHP\Version;
 
@@ -66,9 +67,7 @@ class TelnetServer
     private ?string $pidFile = null;
     private ?int $masterPid = null;
     private array $failedLoginAttempts = [];
-    private int $rateLimitMax;
-    private int $rateLimitWindow;
-    private array $connectionRateTable = [];
+    private ConnectionRateLimiter $rateLimiter;
     /** @var string[] Source IPs allowed to send a PROXY protocol v1 header */
     private array $trustedProxies = [];
     private int $proxyHeaderTimeout = 2;
@@ -117,8 +116,11 @@ class TelnetServer
         $this->insecure = $insecure;
         $this->translator = new Translator();
         $this->systemLocale = (string)Config::env('I18N_DEFAULT_LOCALE', 'en');
-        $this->rateLimitMax    = (int)Config::env('TELNET_RATE_LIMIT_MAX', '5');
-        $this->rateLimitWindow = (int)Config::env('TELNET_RATE_LIMIT_WINDOW', '60');
+        $this->rateLimiter = new ConnectionRateLimiter(
+            (int)Config::env('TELNET_RATE_LIMIT_MAX', '5'),
+            (int)Config::env('TELNET_RATE_LIMIT_WINDOW', '60'),
+            fn(string $message) => $this->log($message)
+        );
         $this->trustedProxies  = array_values(array_filter(array_map(
             'trim',
             explode(',', (string)Config::env('TELNET_TRUSTED_PROXIES', '127.0.0.1,::1'))
@@ -291,6 +293,60 @@ class TelnetServer
     }
 
     /**
+     * Build the stream_socket_enable_crypto() method bitmask for the TLS
+     * listener.
+     *
+     * Everything from the configured floor (TELNET_TLS_MIN_VERSION, default
+     * "1.0" — unchanged from the historical hard-coded behaviour) up through
+     * TLS 1.3 is offered, so a modern client negotiates 1.3 while a legacy BBS
+     * SSL stack that only speaks 1.0/1.1 still connects. Raise the floor to
+     * "1.2" (or "1.3") once you know none of your users need the deprecated
+     * versions. An unrecognised value logs a warning and falls back to "1.0".
+     */
+    public function tlsCryptoMethod(): int
+    {
+        $ladder = [
+            '1.0' => STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,
+            '1.1' => STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,
+            '1.2' => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+            '1.3' => defined('STREAM_CRYPTO_METHOD_TLSv1_3_SERVER')
+                ? STREAM_CRYPTO_METHOD_TLSv1_3_SERVER
+                : 0,
+        ];
+
+        $min = trim((string) Config::env('TELNET_TLS_MIN_VERSION', '1.0'));
+        if ($min === '') {
+            $min = '1.0';
+        } elseif (!isset($ladder[$min])) {
+            $this->log("WARNING: invalid TELNET_TLS_MIN_VERSION '{$min}' — using 1.0");
+            $min = '1.0';
+        }
+
+        $mask    = 0;
+        $reached = false;
+        foreach ($ladder as $version => $bit) {
+            $reached = $reached || $version === $min;
+            if ($reached) {
+                $mask |= $bit;
+            }
+        }
+
+        // Defensive: never return an empty mask (would disable TLS entirely).
+        return $mask !== 0 ? $mask : STREAM_CRYPTO_METHOD_TLSv1_2_SERVER;
+    }
+
+    /**
+     * OpenSSL cipher list for the TLS listener. The historical default
+     * (DEFAULT:@SECLEVEL=0) is kept for compatibility with old BBS SSL
+     * stacks; set TELNET_TLS_CIPHERS to tighten it.
+     */
+    public function tlsCipherList(): string
+    {
+        $ciphers = trim((string) Config::env('TELNET_TLS_CIPHERS', ''));
+        return $ciphers !== '' ? $ciphers : 'DEFAULT:@SECLEVEL=0';
+    }
+
+    /**
      * Configure an optional debug user for auto-login.
      */
     public function setDebugUser(?string $username): void
@@ -373,6 +429,8 @@ class TelnetServer
         if ($this->tlsEnabled) {
             // Resolve default cert paths and auto-generate if needed
             $dataDir = dirname(dirname(__DIR__)) . '/data/telnet';
+            $certExplicit = $this->tlsCert !== null;
+            $keyExplicit  = $this->tlsKey !== null;
             if ($this->tlsCert === null) {
                 $this->tlsCert = $dataDir . '/telnetd.crt';
             }
@@ -380,8 +438,17 @@ class TelnetServer
                 $this->tlsKey = $dataDir . '/telnetd.key';
             }
 
+            // A sysop who pointed TELNET_TLS_CERT / TELNET_TLS_KEY at their own
+            // files expects those to be used, not silently self-signed over.
+            // Surface a precise reason and leave TLS off rather than guessing.
+            if (($certExplicit || $keyExplicit) && !$this->explicitTlsPairUsable()) {
+                $this->tlsEnabled = false;
+            }
+
             try {
-                $this->ensureTlsCert($dataDir);
+                if ($this->tlsEnabled) {
+                    $this->ensureTlsCert($dataDir);
+                }
             } catch (\Exception $e) {
                 $this->log("WARNING: Could not generate TLS certificate: " . $e->getMessage());
                 $this->log("WARNING: TLS disabled — fix certificate configuration or provide valid cert/key files");
@@ -400,10 +467,8 @@ class TelnetServer
                         'local_pk'            => $this->tlsKey,
                         'allow_self_signed'   => true,
                         'verify_peer'         => false,
-                        'crypto_method'       => STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
-                                              | STREAM_CRYPTO_METHOD_TLSv1_1_SERVER
-                                              | STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,
-                        'ciphers'             => 'DEFAULT:@SECLEVEL=0',
+                        'crypto_method'       => $this->tlsCryptoMethod(),
+                        'ciphers'             => $this->tlsCipherList(),
                         'disable_compression' => true,
                     ],
                 ]);
@@ -450,7 +515,7 @@ class TelnetServer
                 if (function_exists('pcntl_waitpid')) {
                     while (pcntl_waitpid(-1, $status, WNOHANG) > 0) {}
                 }
-                $this->cleanRateTable();
+                $this->rateLimiter->clean();
                 continue;
             }
 
@@ -460,6 +525,14 @@ class TelnetServer
                 if (!$conn) {
                     continue;
                 }
+
+                // Disable Nagle's algorithm on the plain accepted socket before
+                // any TLS handshake — interactive keystroke/redraw traffic must
+                // not be batched. Best-effort; never fatal to the connection.
+                TerminalSocketOptions::enableNoDelay(
+                    $conn,
+                    $this->debug ? fn(string $m) => $this->log($m) : null
+                );
 
                 $connectionCount++;
                 [$peerName, $peerIp] = $this->parsePeerAddress($conn);
@@ -483,7 +556,7 @@ class TelnetServer
                     $this->log("Connection from {$peerIp} is not a trusted proxy (trusted: " . implode(',', $this->trustedProxies) . ")");
                 }
 
-                $rl = $peerIp !== null ? $this->isRateLimited($peerIp) : 0;
+                $rl = $peerIp !== null ? $this->rateLimiter->check($peerIp) : 0;
                 if ($rl > 0) {
                     if ($rl === 1) {
                         $this->log("Rate limit exceeded for {$peerIp} - connection rejected");
@@ -547,84 +620,6 @@ class TelnetServer
     private function log(string $message): void
     {
         $this->logger?->info($message);
-    }
-
-    /**
-     * Check whether an IP has exceeded the connection rate limit and update the tracking table.
-     *
-     * The table uses a fixed window per IP: the first connection from an IP starts a window;
-     * all subsequent connections within that window are counted; once the window expires the
-     * counter resets.
-     *
-     * Returns 0 (allow), 1 (reject — caller should log), or 2 (reject — suppressed, caller
-     * should not log). The first rejection in a window returns 1; all further rejections in
-     * the same window return 2 and increment a suppression counter that is flushed by
-     * cleanRateTable() when the window expires.
-     *
-     * Setting TELNET_RATE_LIMIT_MAX to 0 disables rate limiting entirely.
-     *
-     * @param string $ip Remote IP address
-     * @return int 0 = allow, 1 = reject (log), 2 = reject (suppressed)
-     */
-    private function isRateLimited(string $ip): int
-    {
-        if ($this->rateLimitMax <= 0) {
-            return 0;
-        }
-
-        $now = time();
-
-        if (!isset($this->connectionRateTable[$ip])) {
-            $this->connectionRateTable[$ip] = ['count' => 1, 'window_start' => $now, 'logged' => false, 'suppressed' => 0];
-            return 0;
-        }
-
-        $entry = &$this->connectionRateTable[$ip];
-
-        if ($now - $entry['window_start'] >= $this->rateLimitWindow) {
-            // Window expired — flush any suppression count before resetting
-            if ($entry['suppressed'] > 0) {
-                $this->log("Rate limit: {$entry['suppressed']} additional rejection(s) from {$ip} suppressed");
-            }
-            $entry = ['count' => 1, 'window_start' => $now, 'logged' => false, 'suppressed' => 0];
-            return 0;
-        }
-
-        $entry['count']++;
-
-        if ($entry['count'] <= $this->rateLimitMax) {
-            return 0;
-        }
-
-        if (!$entry['logged']) {
-            $entry['logged'] = true;
-            return 1;
-        }
-
-        $entry['suppressed']++;
-        return 2;
-    }
-
-    /**
-     * Remove expired entries from the connection rate table.
-     * Called on each select() timeout to prevent unbounded memory growth.
-     * Flushes suppression counts before removing entries so no rejections are lost.
-     */
-    private function cleanRateTable(): void
-    {
-        if (empty($this->connectionRateTable)) {
-            return;
-        }
-
-        $now = time();
-        foreach ($this->connectionRateTable as $ip => $entry) {
-            if ($now - $entry['window_start'] >= $this->rateLimitWindow) {
-                if ($entry['suppressed'] > 0) {
-                    $this->log("Rate limit: {$entry['suppressed']} additional rejection(s) from {$ip} suppressed");
-                }
-                unset($this->connectionRateTable[$ip]);
-            }
-        }
     }
 
     // ===== TELNET PROTOCOL METHODS =====
@@ -715,12 +710,10 @@ class TelnetServer
         stream_context_set_option($conn, 'ssl', 'local_pk',            $this->tlsKey);
         stream_context_set_option($conn, 'ssl', 'allow_self_signed',   true);
         stream_context_set_option($conn, 'ssl', 'verify_peer',         false);
-        stream_context_set_option($conn, 'ssl', 'ciphers',             'DEFAULT:@SECLEVEL=0');
+        stream_context_set_option($conn, 'ssl', 'ciphers',             $this->tlsCipherList());
         stream_context_set_option($conn, 'ssl', 'disable_compression', true);
 
-        $cryptoMethod = STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
-                      | STREAM_CRYPTO_METHOD_TLSv1_1_SERVER
-                      | STREAM_CRYPTO_METHOD_TLSv1_0_SERVER;
+        $cryptoMethod = $this->tlsCryptoMethod();
 
         error_clear_last();
         $handshake = false;
@@ -752,6 +745,45 @@ class TelnetServer
         $cipher   = $crypto['cipher_name'] ?? 'unknown';
         $bits     = $crypto['cipher_bits'] ?? '?';
         $this->log("TLS connection from {$peerIp} [{$protocol} {$cipher} {$bits}-bit]");
+        return true;
+    }
+
+    /**
+     * Validate a sysop-supplied TLS cert/key pair (TELNET_TLS_CERT /
+     * TELNET_TLS_KEY). Logs a precise reason and returns false if the pair
+     * cannot be used, so run() can leave TLS off instead of self-signing over
+     * the sysop's configuration.
+     */
+    private function explicitTlsPairUsable(): bool
+    {
+        foreach ([['certificate', $this->tlsCert], ['private key', $this->tlsKey]] as [$label, $path]) {
+            if (!is_file($path)) {
+                $this->log("WARNING: TLS {$label} '{$path}' does not exist — TLS disabled");
+                return false;
+            }
+            if (!is_readable($path)) {
+                $this->log("WARNING: TLS {$label} '{$path}' is not readable — TLS disabled");
+                return false;
+            }
+        }
+
+        $cert = @file_get_contents($this->tlsCert);
+        if ($cert === false || @openssl_x509_read($cert) === false) {
+            $this->log("WARNING: TLS certificate '{$this->tlsCert}' is not a valid PEM certificate — TLS disabled");
+            return false;
+        }
+
+        $key = @file_get_contents($this->tlsKey);
+        if ($key === false || @openssl_pkey_get_private($key) === false) {
+            $this->log("WARNING: TLS private key '{$this->tlsKey}' is not a valid PEM private key — TLS disabled");
+            return false;
+        }
+
+        if (!@openssl_x509_check_private_key($cert, $key)) {
+            $this->log("WARNING: TLS certificate and private key do not match — TLS disabled");
+            return false;
+        }
+
         return true;
     }
 

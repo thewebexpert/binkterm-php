@@ -609,6 +609,7 @@ return [
     'errors.webdoor.invalid_slot' => 'Numero de ranura invalido',
     'errors.webdoor.save_too_large' => 'Los datos guardados exceden el tamano maximo',
     'errors.webdoor.save_not_found' => 'Guardado no encontrado',
+    'errors.webdoor.game_unavailable' => 'Este juego no está disponible',
 
     // Door API
     'errors.door.door_name_required' => 'Se requiere el nombre de la puerta',
@@ -832,4 +833,11 @@ return [
     'errors.admin.bbs_settings.invalid_screening_config' => 'Configuración de detección de registros no válida',
     'errors.admin.nntp_settings.load_failed' => 'No se pudo cargar la configuración NNTP',
     'errors.admin.nntp_settings.save_failed' => 'No se pudo guardar la configuración NNTP',
+
+    // ANSI avatars
+    'errors.avatar.invalid' => 'Los datos del avatar ANSI no son válidos',
+    'errors.avatar.too_large' => 'La solicitud del avatar ANSI es demasiado grande',
+    'errors.avatar.malformed' => 'El avatar ANSI debe ser Base64 canónico de un BIN de 120 bytes',
+    'errors.avatar.blank' => 'El avatar ANSI no puede estar en blanco sobre negro',
+    'errors.avatar.dimensions' => 'Los avatares ANSI deben tener exactamente 120 bytes',
 ];

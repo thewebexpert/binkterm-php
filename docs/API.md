@@ -880,6 +880,7 @@ Manually forces or clears the remembered grammar tier for one uplink+robot, with
 |--------|------|------|---------|
 | `POST` | [`/api/auth/login`](#post-apiauthlogin) | No | Authenticate user with username and password, returning session cookie and CSRF token. |
 | `POST` | [`/api/auth/logout`](#post-apiauthlogout) | No | Invalidate user session and clear authentication cookie. |
+| `GET` | [`/api/auth/csrf-token`](#get-apiauthcsrf-token) | Yes | Return the session's current CSRF token (re-sync after a stale-token rejection). |
 | `POST` | [`/api/auth/verify-gateway-token`](#post-apiauthverify-gateway-token) | No | Verify gateway token for external service integration (requires API key). |
 | `POST` | [`/api/auth/gateway-token`](#post-apiauthgateway-token) | Yes | Generate a time-limited gateway token for authenticated user. |
 | `POST` | [`/api/auth/forgot-password`](#post-apiauthforgot-password) | No | Initiate password reset by username or email address. |
@@ -891,6 +892,8 @@ Manually forces or clears the remembered grammar tier for one uplink+robot, with
 Public
 
 Validates credentials and creates an authenticated session. Sets a 30-day HTTP-only session cookie and tracks the login event. Returns a CSRF token for subsequent authenticated requests. The service parameter (default 'web') determines session behavior. Failed authentication returns 401 with invalid credentials error.
+
+Repeated failed attempts are throttled by two independent rolling-window counters — one keyed on the normalized submitted username, one on the resolved client IP (`AUTH_LOGIN_USER_MAX` / `AUTH_LOGIN_IP_MAX` failures per `AUTH_LOGIN_WINDOW` seconds; defaults 5 / 20 / 900). While either counter is over its limit the endpoint returns the **same** generic `401` / `errors.auth.invalid_credentials` response as a wrong password — there is no distinct "locked" status and no account lockout. A successful login clears the username counter but not the IP counter. This applies to every interactive transport, since Web, Telnet, TLS-Telnet and SSH all authenticate through this route.
 
 **Request Body** _(JSON)_
 
@@ -933,6 +936,27 @@ Logout confirmation
 | Field | Type | Description |
 |-------|------|-------------|
 | `success` | boolean | Always true |
+
+---
+
+#### `GET /api/auth/csrf-token`
+
+Requires authentication
+
+Returns the current per-user CSRF token for the authenticated session. The token is rotated whenever the same user logs in again (another browser, or a Telnet/SSH session), which leaves the copy cached by an already-open page or terminal session stale. The web client (`public_html/js/app.js`) and the terminal server (`TelnetUtils::apiRequest()`) call this once after a `403` with `error_code` `errors.auth.invalid_csrf_token`, then retry. Read-only: the token is not rotated.
+
+**Response** _(JSON)_
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Always true |
+| `csrf_token` | string\|null | The session's current CSRF token |
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 401 | Not authenticated |
 
 ---
 
@@ -8389,6 +8413,7 @@ Public profile fields
 | `profile.real_name` | string | Full/real name (may be empty) |
 | `profile.location` | string | Location (may be empty) |
 | `profile.about_me` | string | Biography/about-me text (may be empty) |
+| `profile.ansi_avatar` | string or null | Canonical Base64 of the user's 120-byte ANSI avatar BIN, or `null` when none is saved |
 
 **Error Responses**
 
@@ -8396,6 +8421,106 @@ Public profile fields
 |--------|-------------|
 | 401 | Authentication required |
 | 404 | User not found |
+
+---
+
+#### `GET /api/user/ansi-avatar`
+
+**Requires authentication**
+
+Returns the signed-in user's ANSI avatar. The avatar is a Synchronet-compatible 10 by 6 CP437 BIN. `avatar` is `null` when the user has not saved one.
+
+**Response** _(JSON)_
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Always `true` on success |
+| `avatar` | object or null | Saved avatar, or `null` |
+| `avatar.ansi` | string | Canonical Base64 of the 120-byte BIN (160 characters, no padding) |
+| `avatar.cells` | array of arrays | Six rows of ten cells |
+| `avatar.cells[][].char` | integer | CP437 byte, 0 through 255 |
+| `avatar.cells[][].fg` | integer | Foreground color, 0 through 15 |
+| `avatar.cells[][].bg` | integer | Background color, 0 through 7 |
+| `avatar.cells[][].blink` | boolean | Stored blink bit; display does not animate it |
+| `avatar.cells[][].glyph` | string | Inert Unicode stand-in for the CP437 byte |
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 401 | Authentication required |
+
+---
+
+#### `GET /api/user/ansi-avatar/{id}`
+
+**Requires authentication**
+
+Returns the ANSI avatar of an active user. The response shape matches `GET /api/user/ansi-avatar`. An inactive or unknown user is a 404. Callers cannot use this route to write.
+
+**Path Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| `id` | integer | Active user ID |
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 401 | Authentication required |
+| 404 | User not found |
+
+---
+
+#### `POST /api/user/ansi-avatar`
+
+**Requires authentication**
+
+Replaces the signed-in user's avatar. The session CSRF token must be sent as `X-CSRF-Token`. The body is JSON. A `user_id` or `id` property, if present, is ignored; the write always uses the authenticated user.
+
+**Request Body** _(JSON)_
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `ansi` | string | Yes | Canonical Base64 of a 120-byte BIN |
+
+**Response** _(JSON)_
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | boolean | Avatar saved |
+| `avatar` | object | Same object shape as `GET /api/user/ansi-avatar` |
+| `avatar.ansi` | string | Canonical Base64 that was stored |
+| `avatar.cells` | array of arrays | Six rows of ten cells |
+| `avatar.cells[][].char` | integer | CP437 byte, 0 through 255 |
+| `avatar.cells[][].fg` | integer | Foreground color, 0 through 15 |
+| `avatar.cells[][].bg` | integer | Background color, 0 through 7 |
+| `avatar.cells[][].blink` | boolean | Stored blink bit |
+| `avatar.cells[][].glyph` | string | Inert Unicode stand-in |
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 400 | Body is not a canonical 120-byte avatar (`errors.avatar.invalid`, `errors.avatar.malformed`, `errors.avatar.blank`, `errors.avatar.dimensions`, or `errors.avatar.too_large`) |
+| 401 | Authentication required |
+| 403 | CSRF token missing or not the session token |
+
+---
+
+#### `DELETE /api/user/ansi-avatar`
+
+**Requires authentication**
+
+Removes the signed-in user's avatar. Requires `X-CSRF-Token`. There is no request body. The response is `{ "success": true, "avatar": null }`.
+
+**Error Responses**
+
+| Status | Description |
+|--------|-------------|
+| 401 | Authentication required |
+| 403 | CSRF token missing or not the session token |
 
 ---
 
