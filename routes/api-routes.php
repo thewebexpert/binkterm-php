@@ -6236,9 +6236,10 @@ SimpleRouter::group(['prefix' => '/api'], function() {
         $threaded = isset($_GET['threaded']) && $_GET['threaded'] === 'true';
         $allowedSorts = ['date_desc', 'date_asc', 'subject', 'author'];
         $sort = in_array($_GET['sort'] ?? '', $allowedSorts) ? $_GET['sort'] : 'date_desc';
+        $network = $_GET['network'] ?? null;
 
         // Get messages from subscribed echoareas only
-        $result = $handler->getEchomailFromSubscribedAreas($userId, $page, null, $filter, $threaded, $sort);
+        $result = $handler->getEchomailFromSubscribedAreas($userId, $page, null, $filter, $threaded, $sort, $network);
         $result = apiLocalizeErrorPayload($result, $user);
         echo json_encode($result);
     });

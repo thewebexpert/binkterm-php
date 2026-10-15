@@ -843,7 +843,7 @@ class MessageHandler
     /**
      * Get echomail messages from only subscribed echoareas
      */
-    public function getEchomailFromSubscribedAreas($userId, $page = 1, $limit = null, $filter = 'all', $threaded = false, $sort = 'date_desc')
+    public function getEchomailFromSubscribedAreas($userId, $page = 1, $limit = null, $filter = 'all', $threaded = false, $sort = 'date_desc', $network = null)
     {
         if (!$userId) {
             return ['messages' => [], 'pagination' => ['page' => 1, 'limit' => 25, 'total' => 0, 'pages' => 0]];
@@ -852,11 +852,21 @@ class MessageHandler
         $subscriptionManager = new EchoareaSubscriptionManager();
         $subscribedEchoareas = $subscriptionManager->getUserSubscribedEchoareas($userId);
 
+        if ($network !== null && $network !== '' && $network !== 'all') {
+            $networkLower = strtolower($network);
+            $subscribedEchoareas = array_values(array_filter($subscribedEchoareas, function($area) use ($networkLower) {
+                if ($networkLower === '__local__') {
+                    return !empty($area['is_local']);
+                }
+                return strtolower($area['domain'] ?? '') === $networkLower;
+            }));
+        }
+
         if (empty($subscribedEchoareas) && $filter !== 'saved') {
             return [
                 'messages' => [],
                 'pagination' => ['page' => 1, 'limit' => 25, 'total' => 0, 'pages' => 0],
-                'info' => 'You are not subscribed to any echoareas. Visit /subscriptions to subscribe to echoareas.'
+                'info' => 'You are not subscribed to any echoareas in this network.'
             ];
         }
 
@@ -929,6 +939,15 @@ class MessageHandler
         if ($filter === 'saved') {
             $areaScopeClause = "1=1";
             $areaScopeParams = [];
+            if ($network !== null && $network !== '' && $network !== 'all') {
+                $networkLower = strtolower($network);
+                if ($networkLower === '__local__') {
+                    $areaScopeClause = "ea.is_local = TRUE";
+                } else {
+                    $areaScopeClause = "LOWER(ea.domain) = ?";
+                    $areaScopeParams[] = $networkLower;
+                }
+            }
         } else {
             $echoareaIds = array_column($subscribedEchoareas, 'id');
             $placeholders = str_repeat('?,', count($echoareaIds) - 1) . '?';
