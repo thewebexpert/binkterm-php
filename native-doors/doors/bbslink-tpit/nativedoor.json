@@ -10,7 +10,13 @@
         "description": "Gladiatorial arena combat door game. Train your warrior, buy armor, and survive the arena.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "RPG",
+            "Action",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

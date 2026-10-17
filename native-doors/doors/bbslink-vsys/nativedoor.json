@@ -1,32 +1,38 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Virtual Sysop (BBSLink)",
-    "short_name": "Virtual Sysop",
-    "author": "Sysop Software",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1993,
-    "description": "Interactive virtual Sysop simulation where callers interact with an AI sysop.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh vsys {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Virtual Sysop (BBSLink)",
+        "short_name": "Virtual Sysop",
+        "author": "Sysop Software",
+        "version": "1.0",
+        "release_year": 1993,
+        "description": "Interactive virtual Sysop simulation where callers interact with an AI sysop.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Simulation",
+            "Strategy",
+            "Classic"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh vsys {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

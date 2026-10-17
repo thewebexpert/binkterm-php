@@ -10,7 +10,15 @@
         "description": "The definitive space trading and combat strategy game. Trade commodities, colonize planets, and conquer sectors.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Strategy",
+            "Space",
+            "Sci-Fi",
+            "Trading",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

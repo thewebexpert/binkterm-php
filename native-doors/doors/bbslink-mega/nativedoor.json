@@ -1,32 +1,37 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Mega Slots (BBSLink)",
-    "short_name": "Mega Slots",
-    "author": "Casino Systems",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1992,
-    "description": "Vegas-style progressive slot machine casino door game with jackpot tracking.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh mega {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Mega Slots (BBSLink)",
+        "short_name": "Mega Slots",
+        "author": "Casino Systems",
+        "version": "1.0",
+        "release_year": 1992,
+        "description": "Vegas-style progressive slot machine casino door game with jackpot tracking.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Casino",
+            "Arcade"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh mega {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

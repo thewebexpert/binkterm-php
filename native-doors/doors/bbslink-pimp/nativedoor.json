@@ -10,7 +10,13 @@
         "description": "Competitive urban strategy door game with street turf battles and economy.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Strategy",
+            "Classic",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

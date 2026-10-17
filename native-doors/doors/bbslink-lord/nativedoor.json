@@ -10,7 +10,14 @@
         "description": "The classic fantasy RPG. Slay the Red Dragon, flirt with Violet, and battle rival warriors across the realm.",
         "players": "Multi-player",
         "icon": "icon.jpg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "RPG",
+            "Fantasy",
+            "Classic",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

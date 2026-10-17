@@ -1,32 +1,37 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Hackin' Crackin' (BBSLink)",
-    "short_name": "Hackin' Crackin'",
-    "author": "Phreak Software",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1991,
-    "description": "Telecom phreaking and hacking simulation door game from the golden BBS era.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh hack {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Hackin' Crackin' (BBSLink)",
+        "short_name": "Hackin' Crackin'",
+        "author": "Phreak Software",
+        "version": "1.0",
+        "release_year": 1991,
+        "description": "Telecom phreaking and hacking simulation door game from the golden BBS era.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Simulation",
+            "Strategy"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh hack {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

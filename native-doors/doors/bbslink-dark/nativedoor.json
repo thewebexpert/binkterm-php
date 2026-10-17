@@ -1,32 +1,38 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Darklands (BBSLink)",
-    "short_name": "Darklands",
-    "author": "Dark Software",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1993,
-    "description": "Multiplayer dark fantasy RPG set in a grim medieval realm filled with beasts and forgotten magic.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh dark {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Darklands (BBSLink)",
+        "short_name": "Darklands",
+        "author": "Dark Software",
+        "version": "1.0",
+        "release_year": 1993,
+        "description": "Multiplayer dark fantasy RPG set in a grim medieval realm filled with beasts and forgotten magic.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "RPG",
+            "Fantasy",
+            "Multiplayer"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh dark {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

@@ -1,32 +1,38 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Darkness 2.0 (BBSLink)",
-    "short_name": "Darkness",
-    "author": "Darkness Software",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1994,
-    "description": "Vampiric gothic horror strategy door game where vampires stalk the night.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh dkns {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Darkness 2.0 (BBSLink)",
+        "short_name": "Darkness",
+        "author": "Darkness Software",
+        "version": "1.0",
+        "release_year": 1994,
+        "description": "Vampiric gothic horror strategy door game where vampires stalk the night.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Strategy",
+            "RPG",
+            "Multiplayer"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh dkns {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

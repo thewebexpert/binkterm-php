@@ -10,7 +10,13 @@
         "description": "Epic post-nuclear strategy wargame. Manage your barony, build nuclear missiles, and wage global war.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Strategy",
+            "Classic",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

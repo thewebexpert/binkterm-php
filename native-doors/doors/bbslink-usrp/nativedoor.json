@@ -10,7 +10,14 @@
         "description": "Multiplayer dungeon crawling fantasy RPG with kings, gods, assassins, and castle politics.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "RPG",
+            "Fantasy",
+            "Classic",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

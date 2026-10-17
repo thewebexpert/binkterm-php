@@ -10,7 +10,13 @@
         "description": "Rich multi-user dungeon crawl RPG featuring quests, guilds, magic, and real-time party combat.",
         "players": "Multi-player",
         "icon": "icon.svg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "MUD",
+            "RPG",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",

@@ -1,32 +1,37 @@
 {
-  "type": "nativedoor",
-  "version": "1.0",
-  "game": {
-    "name": "Fresh Water Fishing Sim (BBSLink)",
-    "short_name": "Fresh Water Fishing",
-    "author": "Sim Doors",
+    "type": "nativedoor",
     "version": "1.0",
-    "release_year": 1993,
-    "description": "Lakeside fishing simulator door game with realistic fish species, bait, and tournament leaderboards.",
-    "players": "Multi-player",
-    "icon": "icon.svg",
-    "screenshot": null
-  },
-  "door": {
-    "executable": "bbslink.sh",
-    "launch_command": "/bin/bash bbslink.sh fish {user_number}",
-    "dropfile_format": "DOOR.SYS",
-    "max_nodes": 10,
-    "ansi_required": false,
-    "time_per_day": 30,
-    "output_encoding": "cp437"
-  },
-  "requirements": {
-    "admin_only": false
-  },
-  "config": {
-    "enabled": true,
-    "credit_cost": 0,
-    "max_sessions": 10
-  }
+    "game": {
+        "name": "Fresh Water Fishing Sim (BBSLink)",
+        "short_name": "Fresh Water Fishing",
+        "author": "Sim Doors",
+        "version": "1.0",
+        "release_year": 1993,
+        "description": "Lakeside fishing simulator door game with realistic fish species, bait, and tournament leaderboards.",
+        "players": "Multi-player",
+        "icon": "icon.svg",
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "Simulation",
+            "Sports"
+        ]
+    },
+    "door": {
+        "executable": "bbslink.sh",
+        "launch_command": "/bin/bash bbslink.sh fish {user_number}",
+        "dropfile_format": "DOOR.SYS",
+        "max_nodes": 10,
+        "ansi_required": false,
+        "time_per_day": 30,
+        "output_encoding": "cp437"
+    },
+    "requirements": {
+        "admin_only": false
+    },
+    "config": {
+        "enabled": true,
+        "credit_cost": 0,
+        "max_sessions": 10
+    }
 }

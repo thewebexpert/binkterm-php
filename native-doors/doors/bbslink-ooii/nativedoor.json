@@ -10,7 +10,14 @@
         "description": "Post-apocalyptic wasteland survival RPG. Scavenge the ruined world, battle mutants, and build your stronghold.",
         "players": "Multi-player",
         "icon": "icon.jpg",
-        "screenshot": null
+        "screenshot": null,
+        "genre": [
+            "BBSLink",
+            "RPG",
+            "Strategy",
+            "Post-Apocalyptic",
+            "Multiplayer"
+        ]
     },
     "door": {
         "executable": "bbslink.sh",
