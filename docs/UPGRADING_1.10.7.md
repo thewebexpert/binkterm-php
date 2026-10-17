@@ -1,5 +1,7 @@
 # Upgrading to 1.10.7
 
+BinktermPHP 1.10.7 is a hardening and reliability release. It improves mail routing, AreaFix/FileFix handling and BinkP session reliability, and adds new features for terminal users and door games, including ANSI avatars and mobile touch controls. It also includes a broad set of security improvements. Some changes alter existing behavior, so review the notes below before upgrading.
+
 Make sure you have a current backup of your database and files before upgrading.
 
 ## Table of Contents
@@ -33,6 +35,7 @@ Make sure you have a current backup of your database and files before upgrading.
   - [Docker: telnet Client Added for the BBSLink Door](#docker-telnet-client-added-for-the-bbslink-door)
   - [Admin Daemon Keeps Log Lines It Cannot Write](#admin-daemon-keeps-log-lines-it-cannot-write)
   - [Fixed: Each Login Recorded Exactly Once](#fixed-each-login-recorded-exactly-once)
+  - [Downlink Queue Sorted by Owner and Shows Network Domain](#downlink-queue-sorted-by-owner-and-shows-network-domain)
 - [Web Interface](#web-interface)
   - [Fresh Assets After an Upgrade](#fresh-assets-after-an-upgrade)
   - [Login Page Honors "Remember Me"](#login-page-honors-remember-me)
@@ -69,6 +72,8 @@ Make sure you have a current backup of your database and files before upgrading.
 - [Security](#security)
   - [Secure Flag on Session Cookies](#secure-flag-on-session-cookies)
   - [Default Terminal Registration Secret No Longer Trusted](#default-terminal-registration-secret-no-longer-trusted)
+  - [Failed-Login Throttle](#failed-login-throttle)
+  - [Retro Audio Proxy Hardened](#retro-audio-proxy-hardened)
   - [Telnet and SSH Sessions Disconnected When Their Web Session Is Revoked](#telnet-and-ssh-sessions-disconnected-when-their-web-session-is-revoked)
   - [PacketBBS Sessions End When Their Web Session Is Revoked](#packetbbs-sessions-end-when-their-web-session-is-revoked)
   - [Docker: Config JSON Files No Longer World-Readable](#docker-config-json-files-no-longer-world-readable)
@@ -120,6 +125,7 @@ Make sure you have a current backup of your database and files before upgrading.
 - **SQL migrations split on real statement boundaries:** the upgrade script now finds the end of each statement in a `.sql` migration by reading the SQL, instead of by pattern matching. A `;` or `--` inside a quoted string, a function body or a block comment no longer corrupts the migration. Every migration shipped with BinktermPHP is split exactly as before.
 - **Docker: telnet client added for the BBSLink door:** the container image now includes the `telnet` package, which the BBSLink native door (`bbslinknative`) needs. Rebuild the image to get it.
 - **Fixed: each login is recorded exactly once:** Telnet and SSH logins were recorded twice, which inflated the total login count and Today's Callers, and credited half of them to the web. PacketBBS logins were not recorded at all and did not update the user's last login time. Each successful login now produces one login event tagged with the service it came in on (`web`, `telnet`, `ssh` or `packetbbs`).
+- **Downlink queue sorted by owner and shows network domain:** the summary table on the **Downlink Queue** tab of the BinkP status page now lists downlinks grouped by owner, then by address, and shows each downlink's network domain after its address, for example `21:3/236.10@examplenet`.
 
 ### Web Interface
 
@@ -176,7 +182,7 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Docker: config JSON files no longer world-readable:** the container now restricts the top-level `config/*.json` files, which hold uplink passwords and API keys, to the owner and group at startup. Previously they were readable by any user in the container.
 - **BinkP debug logging no longer records password material:** with debug logging on, BinkP authentication logged the first characters of the received and expected passwords and the CRAM-MD5 challenge with its digest. Only outcomes, lengths and a hint about why a password did not match are logged now, unless you set `BINKP_LOG_SENSITIVE_AUTH=true`.
 - **Auto Feed verifies TLS and allows only http(s) feeds:** RSS and Atom feeds are now fetched with HTTPS certificate and host name verification, and only `http://` and `https://` URLs are accepted. A feed with an invalid or self-signed certificate now fails instead of being fetched.
-- **Telnet TLS offers TLS 1.3 and validates your certificate:** the TLS Telnet listener now accepts TLS 1.3 as well as 1.0 to 1.2. `TELNET_TLS_MIN_VERSION` sets the oldest version accepted and `TELNET_TLS_CIPHERS` sets the cipher list. A certificate and key you supply are checked at start-up, and TLS stays off, with the reason logged, if they are unusable.
+- **Telnet TLS offers TLS 1.3 and validates your certificate:** the TLS Telnet listener now accepts TLS 1.3 as well as 1.0 to 1.2. `TELNET_TLS_MIN_VERSION` sets the oldest version accepted and `TELNET_TLS_CIPHERS` sets the cipher list. A certificate and key you supply are checked at start-up, and TLS stays off, with the reason logged, if they are unusable. The generated self-signed certificate is now ECDSA so that SyncTERM can connect; `TELNET_TLS_KEY_TYPE=rsa` restores RSA.
 - **Login takes the same time for unknown usernames:** a login with a username that does not exist used to fail faster than a login with a real username and a wrong password, which let anyone tell which accounts exist by timing the responses. Both failures now take about the same time.
 - **WebDoor API only serves installed, enabled games:** the session, storage and leaderboard endpoints used under `/api/webdoor/` now accept only a `game_id` that names an installed WebDoor which is enabled and whose requirements are met. Any other id gets a `404` and nothing is read or written. Before, any string was accepted and created session, save and leaderboard rows.
 - **Telnet drops idle connections sooner before login:** a Telnet connection that sits silent at the login, register or reset-password prompts is now disconnected after 90 seconds instead of the 7 minutes allowed for a signed-in session. Set `TELNET_PREAUTH_IDLE_TIMEOUT` in `.env` to change it.
@@ -451,6 +457,15 @@ The login API is now the single place a login is recorded. It tags the event wit
 
 Login events recorded before the upgrade are not changed, so historical counts for Telnet and SSH callers stay higher than they should be.
 
+### Downlink Queue Sorted by Owner and Shows Network Domain
+
+The **Downlink Queue** tab on the BinkP status page summarizes the outbound packets queued for each downlink node or point, with its pending, failed, held and sent counts. The summary table was sorted by address alone, so downlinks belonging to the same user were scattered through the list, and an address did not show which network it belonged to.
+
+- **Order:** downlinks are now sorted by owner username first, ignoring letter case, and by address second. Addresses compare numerically within an owner, so `21:3/236.10` comes before `21:3/236.11`. Downlinks with no owner are listed first.
+- **Domain:** each address is now followed by its network domain, for example `21:3/236.10@examplenet`. For a node the domain is looked up from its address, and for a point it is the domain of the boss address it is attached to. If no domain can be determined, the address is shown without one.
+
+The queue list API behind this tab, `getHubOutboundQueue()`, now returns a `domain` field on each row.
+
 ## Web Interface
 
 ### Fresh Assets After an Upgrade
@@ -724,6 +739,38 @@ Until it is set:
 - telnet/SSH registrations are treated like browser registrations and are rejected by the browser timing check ("Session expired");
 - `scripts/setup.php` prints a warning with a generated value you can paste into `.env`, and the server log records a warning when a terminal registration arrives.
 
+### Failed-Login Throttle
+
+Nothing used to limit how many times a password could be guessed. Repeated failed logins are now limited by two independent counters, each over a rolling window:
+
+- **Per account:** 5 failures. This stops guessing against one account. Logging in by username and by real name for the same account share one counter.
+- **Per source IP:** 20 failures. This is more generous, so a shared address such as a NAT gateway is not locked out by a few mistakes, while still stopping one source from trying many usernames.
+
+The default window is 15 minutes. A login is refused while either counter is at its limit. The refusal is the same `401` "invalid credentials" answer a wrong password gets, so it does not reveal that a limit was reached or that an account exists, and nothing is locked permanently: attempts work again once the failures age out of the window. A successful login clears that account's counter but not the source IP's counter, so holding one valid account does not reset an IP that has been guessing at others.
+
+The throttle covers every place a username and password is checked: the web login, Telnet, TLS-Telnet and SSH (which sign in through the web login), FTP, NNTP and QWK HTTP downloads and uploads. A throttled FTP login gets `530 Login incorrect` and a throttled NNTP login gets `481 Authentication failed`. Anonymous FTP has no credentials and is not throttled. Loopback and the server's own address are not counted against the IP limit, so a Telnet or SSH installation whose sessions all appear to come from the server cannot lock out every terminal user. The per-account limit still applies.
+
+To change the limits, set these in `.env`:
+
+```ini
+AUTH_LOGIN_USER_MAX=5
+AUTH_LOGIN_IP_MAX=20
+AUTH_LOGIN_WINDOW=900
+```
+
+`AUTH_LOGIN_WINDOW` is in seconds. A value that is not a positive number uses the default, so the throttle cannot be switched off by a bad value. The counters are kept in a new `auth_login_attempts` table, created by the upgrade migration, so they are shared by all web workers and the terminal daemons. If the table cannot be reached, for example because the migration has not run, logins proceed unthrottled and the error is written to the server log.
+
+Restart the telnet and SSH daemons so they load the new code; `scripts/restart_daemons.sh` does this. See [CONFIGURATION.md](CONFIGURATION.md#failed-login-throttle).
+
+### Retro Audio Proxy Hardened
+
+The retro audio player loads tracker, SID and MIDI files linked from messages through `GET /api/media/raw`, which fetches the remote file on behalf of the browser. The endpoint had two weaknesses that are now fixed:
+
+- **Active content served from the BBS origin.** The remote server's `Content-Type` was passed through and the file was served inline, so a link ending in `.mid` could return HTML or JavaScript that ran as the BBS for anyone who opened the proxy URL. The response is now always an opaque `application/octet-stream` download with `nosniff` and a sandboxing `Content-Security-Policy`. The player reads the file with `fetch()`, so playback is unaffected.
+- **Fetches to internal addresses.** The host was checked with an IPv4-only lookup, and the fetch then resolved the name again, so a host with an internal IPv6 address, or one that changed its DNS answer between the check and the fetch, could make the server connect to an internal service. Every IPv4 and IPv6 address of the host must now be public, and the connection is pinned to exactly those addresses on every redirect hop. Only `http` on port 80 and `https` on port 443 are fetched, proxy settings in the server environment are ignored, and the 8 MB limit is enforced while downloading, so it also applies to responses that do not announce a length.
+
+The endpoint remains available to visitors who are not logged in, so retro audio keeps playing on public shared messages.
+
 ### Telnet and SSH Sessions Disconnected When Their Web Session Is Revoked
 
 A Telnet or SSH login creates a web auth session, which was checked only once, at login. If that session was later removed, the terminal session stayed connected with full access, and so did any door the user was playing. A session can be removed by:
@@ -809,6 +856,16 @@ TELNET_TLS_CIPHERS=DEFAULT:@SECLEVEL=0
 
 If you set `TELNET_TLS_CERT` and `TELNET_TLS_KEY` to your own certificate and key, the daemon now checks them when it starts: both files must exist and be readable, be valid PEM, and the certificate must match the key. If any check fails, the daemon logs the exact reason and starts with the TLS listener off, while the plain Telnet listener keeps running. It does not create a self-signed certificate in place of the one you configured. A self-signed pair is generated under `data/telnet/` only when both settings are left unset.
 
+The self-signed certificate the daemon generates now uses an ECDSA P-256 key instead of RSA. With an RSA certificate, OpenSSL signs the TLS handshake with RSA-PSS, and SyncTERM cannot verify that signature: it fails with `TLS: Could not find any algorithm named 'PSS(SHA-256,MGF1,32)'`. A new setting selects the key type for generated certificates:
+
+```ini
+TELNET_TLS_KEY_TYPE=ec
+```
+
+- **`TELNET_TLS_KEY_TYPE`** is `ec` (the default) or `rsa`. Set `rsa` only if an old terminal program cannot handle ECDSA certificates.
+
+The setting only applies when a certificate is generated. A certificate created by an earlier version stays RSA, so SyncTERM keeps failing until you replace it: stop the telnet daemon, delete `data/telnet/telnetd.crt` and `data/telnet/telnetd.key`, and start it again. A certificate you supply through `TELNET_TLS_CERT` and `TELNET_TLS_KEY` is never replaced; use an ECDSA certificate there if SyncTERM users connect.
+
 Check that the TLS listener is up after restarting the telnet daemon. Each TLS connection is logged with the negotiated version, cipher and key size, for example `TLS connection from 192.0.2.10 [TLSv1.3 TLS_AES_256_GCM_SHA384 256-bit]`. See [TelnetServer.md](TelnetServer.md).
 
 ### Login Takes the Same Time for Unknown Usernames
@@ -844,7 +901,6 @@ TELNET_PREAUTH_IDLE_TIMEOUT=90
 The value is in seconds. A value below `15` is ignored and the default of 90 is used, because it could disconnect someone who is still typing their username.
 
 This frees idle sockets; it does not prevent abuse. A client that sends a keystroke every so often can still hold a pre-login connection open. SSH users sign in at the SSH layer before reaching the BBS, so this limit does not apply to them. See [TelnetServer.md](TelnetServer.md).
-
 
 ## Upgrade Instructions
 
