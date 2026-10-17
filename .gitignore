@@ -8,8 +8,6 @@ config/welcome.txt
 config/terminal_welcome.txt
 config/systemnews.twig
 templates/custom/*
-public_html/js/door-filter.js
-public_html/css/door-filter.css
 public_html/js/echo-filter.js
 public_html/css/echo-filter.css
 data/*

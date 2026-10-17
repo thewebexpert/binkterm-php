@@ -1,0 +1,32 @@
+{# Binkterm Echo Area Button Mod #}
+<link rel="stylesheet" href="/css/echo-filter.css?v=3.2">
+<script src="/js/echo-filter.js?v=3.2" defer></script>
+
+
+{# Binkterm Auto-Read Own Posts Mod #}
+<script src="/js/read-own-posts.js?v=1.0" defer></script>
+
+{# Binkterm File Area Button & Directory Mod #}
+<link rel="stylesheet" href="/css/file-filter.css?v=2.0">
+<script src="/js/file-filter.js?v=2.0" defer></script>
+
+{# Hide header banner on door games / terminal player pages #}
+<script>
+(function() {
+    var p = window.location.pathname;
+    if (p.startsWith('/games/') || p.startsWith('/guest-doors/')) {
+        document.documentElement.classList.add('is-game-play-page');
+    }
+})();
+</script>
+<style>
+.is-game-play-page main.container::before,
+.is-game-play-page main.bbs-shell-main::before {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+}
+.is-game-play-page main.container {
+    margin-top: 0.5rem !important;
+}
+</style>
