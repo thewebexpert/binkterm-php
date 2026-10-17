@@ -16,7 +16,7 @@ namespace BinktermPHP;
 
 class RLoginDoorManager
 {
-    private const VALID_BBS_TYPES = ['plain_rlogin', 'synchronet', 'synchronet_service'];
+    private const VALID_BBS_TYPES = ['plain_rlogin', 'synchronet', 'synchronet_service', 'raw_tcp', 'telnet'];
     private const VALID_ENCODINGS = ['utf8', 'cp437'];
 
     /**

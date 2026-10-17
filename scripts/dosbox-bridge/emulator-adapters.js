@@ -991,28 +991,36 @@ class RloginAdapter extends EmulatorAdapter {
         const terminalSpeed = parseInt(doorCfg.terminal_speed, 10) || 38400;
         const termString = `${terminalType}/${terminalSpeed}`;
 
-        slog.log(`[${this.getName()}] Connecting to ${host}:${port} as client='${clientUsername}' server='${serverUsername}' term='${termString}'`);
+        const isRawTcp = doorCfg.bbs_type === 'raw_tcp' || doorCfg.bbs_type === 'telnet';
+        slog.log(`[${this.getName()}] Connecting to ${host}:${port} (${doorCfg.bbs_type || 'plain_rlogin'}) as client='${clientUsername}' server='${serverUsername}' term='${termString}'`);
 
         return new Promise((resolve, reject) => {
             const socket = net.connect({ host, port }, () => {
-                slog.log(`[${this.getName()}] TCP connected, sending rlogin handshake`);
-                // RFC 1282 handshake: \0 clientUsername \0 serverUsername \0 term/speed \0
-                const handshake = Buffer.concat([
-                    Buffer.from([0]),
-                    Buffer.from(clientUsername, 'utf8'),
-                    Buffer.from([0]),
-                    Buffer.from(serverUsername, 'utf8'),
-                    Buffer.from([0]),
-                    Buffer.from(termString, 'utf8'),
-                    Buffer.from([0]),
-                ]);
-                socket.write(handshake);
+                if (isRawTcp) {
+                    slog.log(`[${this.getName()}] TCP connected (raw_tcp mode, skipping rlogin handshake)`);
+                    this.handshakeAcked = true;
+                    resolve({ process: this.socket, pid: null });
+                } else {
+                    slog.log(`[${this.getName()}] TCP connected, sending rlogin handshake`);
+                    // RFC 1282 handshake: \0 clientUsername \0 serverUsername \0 term/speed \0
+                    const handshake = Buffer.concat([
+                        Buffer.from([0]),
+                        Buffer.from(clientUsername, 'utf8'),
+                        Buffer.from([0]),
+                        Buffer.from(serverUsername, 'utf8'),
+                        Buffer.from([0]),
+                        Buffer.from(termString, 'utf8'),
+                        Buffer.from([0]),
+                    ]);
+                    socket.write(handshake);
+                }
             });
 
             socket.setNoDelay(true);
             this.socket = socket;
 
             const onFirstData = (chunk) => {
+                // For rlogin servers:
                 // The server acks the handshake with a single 0x00 byte before the
                 // session stream begins. It may arrive alone or prefixed to the
                 // first real data — strip at most one leading null byte, once.
