@@ -533,9 +533,11 @@ $mobileAssetVer = (string)@filemtime(__DIR__ . '/../../js/binkterm-mobile-termin
                                 data = data.slice(0, -pendingAnsiChunk.length);
                             }
 
-                            // In MS-DOS ANSI.SYS, \x1b[2J clears screen AND homes cursor to (1,1).
-                            // Standard VT100 / xterm.js erases the screen but leaves cursor position unchanged.
-                            // Translate to ensure DOS doors relying on ANSI.SYS cursor homing align correctly.
+                            // In MS-DOS ANSI.SYS and DOSBox/DOS doors:
+                            // 1) \x0c (FormFeed / ASCII 12 / ^L) clears the entire screen and homes cursor to (1,1).
+                            // 2) \x1b[2J clears screen AND homes cursor to (1,1).
+                            // Translate both to ensure DOS doors relying on ANSI.SYS cursor homing align correctly.
+                            data = data.replace(/\x0c/g, '\x1b[2J\x1b[H');
                             data = data.replace(/\x1b\[2J(?!\x1b\[H|\x1b\[1;1H|\x1b\[;H|\x1b\[1;1f)/g, '\x1b[2J\x1b[H');
                         }
                         if (data.length > 0) {

@@ -1057,10 +1057,14 @@ class SessionManager {
                     utf8Data = typeof data === 'string' ? data : data.toString('utf8');
                 }
 
-                // In MS-DOS ANSI.SYS, \x1b[2J clears screen AND homes cursor to (1,1).
-                // xterm.js (DEC VT100 standard) clears screen but preserves cursor position.
-                // For DOS/CP437 doors, translate \x1b[2J to \x1b[2J\x1b[H so layouts align correctly.
+                // In MS-DOS ANSI.SYS and DOSBox/DOS doors:
+                // 1) \x0c (FormFeed / ASCII 12 / ^L) clears the entire screen and homes cursor to (1,1).
+                //    In DEC VT100 / xterm.js, FormFeed does not clear the screen or home the cursor.
+                // 2) \x1b[2J clears screen AND homes cursor to (1,1) in ANSI.SYS, but standard VT100
+                //    preserves the cursor position.
+                // Translate both for DOS/CP437 doors so screen redrawing aligns correctly without ghost text.
                 if (emulatorName === 'DOSBox' || emulatorName === 'Rlogin' || (emulatorName === 'Native' && session.emulator.outputEncoding === 'cp437')) {
+                    utf8Data = utf8Data.replace(/\x0c/g, '\x1b[2J\x1b[H');
                     utf8Data = utf8Data.replace(/\x1b\[2J(?!\x1b\[H|\x1b\[1;1H|\x1b\[;H|\x1b\[1;1f)/g, '\x1b[2J\x1b[H');
                 }
               
@@ -1103,7 +1107,8 @@ class SessionManager {
             try {
                 let utf8Data = iconv.decode(data, 'cp437');
 
-                // In MS-DOS ANSI.SYS, \x1b[2J clears screen AND homes cursor to (1,1).
+                // In MS-DOS ANSI.SYS, \x0c clears screen and homes cursor, and \x1b[2J also homes cursor.
+                utf8Data = utf8Data.replace(/\x0c/g, '\x1b[2J\x1b[H');
                 utf8Data = utf8Data.replace(/\x1b\[2J(?!\x1b\[H|\x1b\[1;1H|\x1b\[;H|\x1b\[1;1f)/g, '\x1b[2J\x1b[H');
 
                 // Forward to WebSocket client if connected
