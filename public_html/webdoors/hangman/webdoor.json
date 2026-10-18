@@ -4,6 +4,7 @@
     "id": "hangman",
     "name": "Hangman",
     "description": "Classic word guessing game with multiple categories, statistics tracking, and interactive graphics.",
+    "genre": ["Arcade"],
     "version": "1.0.0",
     "author": "BinktermPHP",
     "license": "MIT",

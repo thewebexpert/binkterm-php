@@ -727,7 +727,10 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
 
             foreach ($fieldSections as &$section) {
                 foreach ($section['fields'] as &$field) {
-                    $field['value'] = $resolveValue($manifest, $field['path']);
+                    $prefix = \BinktermPHP\Admin\DoorManifest\DoorRuntimeFields::PATH_PREFIX;
+                    $field['value'] = str_starts_with($field['path'], $prefix)
+                        ? $resolveValue($result['runtime'] ?? [], substr($field['path'], strlen($prefix)))
+                        : $resolveValue($manifest, $field['path']);
                     if ($field['value'] === null && isset($field['default'])) {
                         $field['value'] = $field['default'];
                     }
@@ -4219,6 +4222,9 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
                     'id' => $gameId,
                     'name' => $game['name'] ?? $gameId,
                     'path' => $entry['path'],
+                    'description' => $game['description'] ?? '',
+                    'genre' => \BinktermPHP\DoorCategoryHelper::normalizeGenres($game['genre'] ?? []),
+                    'icon_url' => "/webdoors/{$entry['path']}/" . ($game['icon'] ?? 'icon.png'),
                     'config' => is_array($manifest['config'] ?? null) ? $manifest['config'] : null
                 ];
             }
@@ -4310,6 +4316,9 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
                     'id'   => $entry['id'],
                     'name' => $manifest['name'] ?? $entry['id'],
                     'path' => $entry['path'],
+                    'description' => $manifest['description'] ?? '',
+                    'genre' => \BinktermPHP\DoorCategoryHelper::normalizeGenres($manifest['genre'] ?? ($manifest['game']['genre'] ?? [])),
+                    'icon_url' => "/jsdos-doors/{$entry['path']}/" . ($manifest['icon'] ?? 'icon.png'),
                 ];
             }
 
@@ -4404,6 +4413,8 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
                     'short_name' => $door['short_name'] ?? $door['name'],
                     'author' => $door['author'] ?? 'Unknown',
                     'description' => $door['description'] ?? '',
+                    'genre' => \BinktermPHP\DoorCategoryHelper::normalizeGenres($door['genre'] ?? []),
+                    'icon_url' => !empty($door['icon']) ? "/door-assets/{$doorId}/icon" : null,
                     'config' => $door['config'] ?? []
                 ];
             }
@@ -4468,6 +4479,8 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
                     'author' => $door['author'] ?? 'Unknown',
                     'description' => $door['description'] ?? '',
                     'platform' => $door['platform'] ?? [],
+                    'genre' => \BinktermPHP\DoorCategoryHelper::normalizeGenres($door['genre'] ?? []),
+                    'icon_url' => !empty($door['icon']) ? "/door-assets/{$doorId}/icon" : null,
                     'config' => $door['config'] ?? []
                 ];
             }
@@ -4580,6 +4593,7 @@ SimpleRouter::group(['prefix' => '/admin'], function() {
                     'short_name' => $door['short_name'] ?? $door['name'],
                     'author' => $door['author'] ?? 'Unknown',
                     'description' => $door['description'] ?? '',
+                    'genre' => $door['genre'] ?? [],
                     'host' => $door['host'] ?? '',
                     'port' => $door['port'] ?? 513,
                     'bbs_type' => $door['bbs_type'] ?? 'plain_rlogin',
@@ -5070,7 +5084,8 @@ PROMPT;
                     return;
                 }
                 $client = new \BinktermPHP\Admin\AdminDaemonClient();
-                $client->saveDoorManifest($doorType, $doorId, $manifest);
+                $runtime = is_array($payload['runtime'] ?? null) ? $payload['runtime'] : null;
+                $client->saveDoorManifest($doorType, $doorId, $manifest, $runtime);
                 echo json_encode([
                     'success'      => true,
                     'message_code' => 'ui.admin.door_manifest_editor.saved_success',

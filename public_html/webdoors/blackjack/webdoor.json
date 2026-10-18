@@ -7,7 +7,8 @@
     "author": "BinktermPHP",
     "description": "Single-player casino Blackjack featuring play chips, split & double down, persistent storage, and leaderboards.",
     "entry_point": "index.php",
-    "icon": "icon.svg"
+    "icon": "icon.svg",
+    "genre": ["Card Games", "Casino"]
   },
   "requirements": {
     "min_host_version": "1.0",

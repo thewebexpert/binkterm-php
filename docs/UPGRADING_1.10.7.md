@@ -55,6 +55,7 @@ Make sure you have a current backup of your database and files before upgrading.
   - [Fixed: Door Player Limits Could Be Exceeded by Simultaneous Launches](#fixed-door-player-limits-could-be-exceeded-by-simultaneous-launches)
   - [Fixed: PubTerm Native Door Block Graphics](#fixed-pubterm-native-door-block-graphics)
   - [Door Category Tabs and Door Display Settings](#door-category-tabs-and-door-display-settings)
+  - [Door Admin Pages: Settings List and Runtime Settings in the Manifest Editor](#door-admin-pages-settings-list-and-runtime-settings-in-the-manifest-editor)
 - [MeshCore](#meshcore)
   - [Radio Settings Link on the Dashboard](#radio-settings-link-on-the-dashboard)
 - [Networks](#networks)
@@ -150,6 +151,7 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Fixed: door player limits could be exceeded by simultaneous launches:** several players launching the same door at the same moment could all pass the door's maximum-players check, or be given the same node number. The check and node assignment are now done as one step. A launch that loses the race for the last slot gets an HTTP `503` "Door at capacity" response.
 - **Fixed: PubTerm native door block graphics:** the PubTerm native door now uses CP437 output and an 8-bit Telnet connection, so ANSI block graphics display correctly instead of as replacement characters.
 - **Door category tabs and door display settings:** the door games page can now group doors by category (genre) instead of by runtime type, with filter tabs and live counts, and the door editors have a category dropdown. A new **Doors** tab under **Admin -> Appearance & Content** controls the grouping, whether DoorParty, BBSLink and A-Net keep their own tabs, and whether the Top Scores leaderboard is shown.
+- **Door admin pages: settings list and runtime settings in the manifest editor:** the DOS, Native, JS-DOS and Web door pages under **Admin** now open on a **Settings** tab that lists each door, with the raw JSON file moved to a **JSON** tab. The Door Manifest Editor also gained a **Runtime Settings** card, so a door's manifest and its enabled state, credit cost and limits are saved together with one Save.
 
 ### MeshCore
 
@@ -566,8 +568,10 @@ On phones and tablets, door sessions showed a cropped 80x25 screen, dim green an
 
 - **Scaling:** the 80x25 screen is scaled to fit the width and height of the viewport and anchored to the top. It follows the viewport when the browser's address bar or the on-screen keyboard appears or goes away. The door title bar is made compact on small screens.
 - **Touch gamepad:** a docked three-row control strip. The first row has Esc, Enter, Space, Backspace, a button to show or hide the on-screen keyboard, a contrast button and zoom controls. The second has an arrow pad and the Y, N and Q keys. The third is a scrollable row of the digits 0 to 9 plus hotkeys.
-- **Game layouts:** layouts are chosen from the door's ID or name for Operation Overkill II, Legend of the Red Dragon and Trade Wars 2002, and a standard layout is used for other doors. A layout button opens a picker to switch to another layout.
-- **Contrast modes:** Vivid brightens the dim CGA colors for OLED phone screens, and Amber and Standard are also available from the contrast button.
+- **Game profiles & state sniffing:** specialized profiles are provided for Operation Overkill II, Legend of the Red Dragon, Pimp Wars and Trade Wars 2002. Live screen buffer sniffing automatically switches submode layouts (such as Wasteland movement versus Combat, or Town Square versus shop/inn menus) in real time. Players can also tap the layout pill or mode badge to pick layouts or toggle auto-detection.
+- **Contrast modes & themes:** Vivid brightens dim CGA colors for OLED phone screens, with Amber and Standard contrast modes also available. Gamepad buttons and overlays are integrated with the Amber, Green Phosphor, Cyberpunk and Dark themes without harsh light colors.
+- **Desktop default minimization setting:** sysops can configure **Minimize On-Screen Door Gamepad on Desktop by Default** under **Admin -> Settings -> Appearance -> Web Doors** (`minimize_onscreen_keyboard_desktop`), keeping the gamepad collapsed on desktop by default while remaining one tap away via the pull tab. Mobile devices always open the touch gamepad by default.
+- **Localization:** all buttons, tooltips, mode badges and modal labels are fully localized across all six supported languages.
 - **Mouse wheel:** scrolling the mouse wheel over a door terminal no longer sends stray escape codes or periods to the door.
 
 Desktop browsers keep the existing mouse and keyboard behavior. The door pages request the new stylesheet and script with a version taken from the file's modification time, and the service worker cache version was raised, so browsers load the new files without a manual refresh.
@@ -626,6 +630,28 @@ The grouping is set in **Admin -> Appearance & Content -> Doors**:
 `scripts/list_door_categories.php` uses the same category rules as the page, and its new `--separate-networks` option shows the DoorParty, BBSLink, A-Net and Door Servers groups separately.
 
 If you prefer the previous grouping after upgrading, set **Group doors by** to **Door Type**.
+
+### Door Admin Pages: Settings List and Runtime Settings in the Manifest Editor
+
+The admin pages for DOS Doors, Native Doors, JS-DOS Doors and WebDoors used to be a list of door names with an enable switch beside a text editor for the door type's config file (`config/dosdoors.json`, `config/nativedoors.json`, `config/jsdosdoors.json` or `config/webdoors.json`). Changing a door's credit cost or session limits meant editing that JSON by hand.
+
+**Settings and JSON tabs.** Each of these pages now has two tabs:
+
+- **Settings** lists every door, in the same layout as the RLogin door list: its icon, an enabled or disabled marker, name, description, and badges for its ID, genre, credit cost and "Telnet/SSH only". The pen button opens a form for that door's settings and saves it as soon as you click **Save**. The file button opens the door's Door Manifest Editor.
+- **JSON** is the config file editor as before, with the **Format** button moved onto this tab. Edits made on either tab show up on the other, and the page's **Save** button saves the file.
+
+The settings available in the form depend on the door type:
+
+| Door type | Settings |
+|-----------|----------|
+| DOS | enabled, credit cost, max session time, CPU cycles, max concurrent sessions, hide from web |
+| Native | enabled, credit cost, max session time, max concurrent sessions, allow anonymous, guest max sessions, hide from web |
+| JS-DOS | enabled, display name override, display description override |
+| Web | enabled |
+
+Config file entries the form does not list, such as a WebDoor's own game settings or a Native door's `terminal_size`, are kept as they are. Clearing a number or text field removes that setting from the file. The left-hand list of doors on these pages was removed because the Settings tab replaces it; **Enable All** and **Disable All** on the DOS and Native pages and the list of door directories without a manifest are unchanged.
+
+**Runtime Settings in the Door Manifest Editor.** The editor for a door's manifest now ends with a **Runtime Settings** card containing the same settings as the table above. **Save** writes the manifest and then updates that door's entry in the config file, in one step. Only the settings listed above are changed, and other entries for the door in the file are preserved. As with all admin config writes, this is done by the admin daemon, so restart the admin daemon after upgrading for the new card to save.
 
 ## Networks
 

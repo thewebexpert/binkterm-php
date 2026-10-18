@@ -6,6 +6,7 @@
     "version": "1.0.0",
     "author": "BinktermPHP",
     "description": "Daily and free-play five-letter word guessing game with game stats and monthly leaderboards.",
+    "genre": ["Trivia"],
     "entry_point": "index.html",
     "icon": "icon.svg",
     "screenshots": []
