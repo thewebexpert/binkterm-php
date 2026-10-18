@@ -2,7 +2,7 @@
     "type": "nativedoor",
     "version": "1.0",
     "game": {
-        "name": "DoorMUD (BBSLink)",
+        "name": "DoorMUD",
         "short_name": "DoorMUD",
         "author": "John Dailey Software",
         "version": "1.0",
