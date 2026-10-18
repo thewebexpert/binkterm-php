@@ -1,0 +1,109 @@
+{
+    "id": "lsl1vga",
+    "name": "Leisure Suit Larry in the Land of the Lounge Lizards (VGA)",
+    "version": "1.0",
+    "author": "Sierra On-Line",
+    "description": "Guide 38-year-old Larry Laffer in his polyester suit through Lost Wages in this 1991 VGA remake of the legendary adult comedy adventure.",
+    "icon": "icon.png",
+    "genre": ["JSDOS", "Adventure", "Comedy"],
+    "emulator": "jsdos",
+    "emulator_config": {
+        "cpu_cycles": "9000",
+        "memory_mb": 16,
+        "machine": "vga",
+        "output": "surface",
+        "scaler": "normal2x",
+        "autolock": true,
+        "game_files": [
+            {"asset_path": "assets/ADL.DRV", "dos_path": "C:/LSL1VGA/ADL.DRV"},
+            {"asset_path": "assets/IBMKBD.DRV", "dos_path": "C:/LSL1VGA/IBMKBD.DRV"},
+            {"asset_path": "assets/INSTALL.EXE", "dos_path": "C:/LSL1VGA/INSTALL.EXE"},
+            {"asset_path": "assets/INSTALL.HLP", "dos_path": "C:/LSL1VGA/INSTALL.HLP"},
+            {"asset_path": "assets/INSTALL.TXT", "dos_path": "C:/LSL1VGA/INSTALL.TXT"},
+            {"asset_path": "assets/INTERP.TXT", "dos_path": "C:/LSL1VGA/INTERP.TXT"},
+            {"asset_path": "assets/JOYSTICK.DRV", "dos_path": "C:/LSL1VGA/JOYSTICK.DRV"},
+            {"asset_path": "assets/LARRY.DRV", "dos_path": "C:/LSL1VGA/LARRY.DRV"},
+            {"asset_path": "assets/LSL1VGA.BAT", "dos_path": "C:/LSL1VGA/LSL1VGA.BAT"},
+            {"asset_path": "assets/MT32.DRV", "dos_path": "C:/LSL1VGA/MT32.DRV"},
+            {"asset_path": "assets/MTBLAST.DRV", "dos_path": "C:/LSL1VGA/MTBLAST.DRV"},
+            {"asset_path": "assets/PROAUDIO.DRV", "dos_path": "C:/LSL1VGA/PROAUDIO.DRV"},
+            {"asset_path": "assets/RESOURCE.000", "dos_path": "C:/LSL1VGA/RESOURCE.000"},
+            {"asset_path": "assets/RESOURCE.001", "dos_path": "C:/LSL1VGA/RESOURCE.001"},
+            {"asset_path": "assets/RESOURCE.002", "dos_path": "C:/LSL1VGA/RESOURCE.002"},
+            {"asset_path": "assets/RESOURCE.CFG", "dos_path": "C:/LSL1VGA/RESOURCE.CFG"},
+            {"asset_path": "assets/RESOURCE.MAP", "dos_path": "C:/LSL1VGA/RESOURCE.MAP"},
+            {"asset_path": "assets/SCIDHUV.EXE", "dos_path": "C:/LSL1VGA/SCIDHUV.EXE"},
+            {"asset_path": "assets/SIERRA.BAT", "dos_path": "C:/LSL1VGA/SIERRA.BAT"},
+            {"asset_path": "assets/SNDBLAST.DRV", "dos_path": "C:/LSL1VGA/SNDBLAST.DRV"},
+            {"asset_path": "assets/STD.DRV", "dos_path": "C:/LSL1VGA/STD.DRV"},
+            {"asset_path": "assets/VERSION", "dos_path": "C:/LSL1VGA/VERSION"},
+            {"asset_path": "assets/VGA320.DRV", "dos_path": "C:/LSL1VGA/VGA320.DRV"},
+            {"asset_path": "assets/VGA320BW.DRV", "dos_path": "C:/LSL1VGA/VGA320BW.DRV"}
+        ],
+        "autoexec": [
+            "C:",
+            "cd LSL1VGA",
+            "SET BLASTER=A220 I7 D1 T4",
+            "SCIDHUV.EXE"
+        ]
+    },
+    "modes": {
+        "config": {
+            "label": "Admin Setup",
+            "description": "Admin-only configuration mode. Launches INSTALL.EXE to configure audio/video drivers and hardware options.",
+            "admin_only": true,
+            "keep_open": true,
+            "emulator_config": {
+                "cpu_cycles": "9000",
+                "memory_mb": 16,
+                "machine": "vga",
+                "output": "surface",
+                "scaler": "normal2x",
+                "autolock": true,
+                "game_files": [
+                    {"asset_path": "assets/INSTALL.EXE", "dos_path": "C:/LSL1VGA/INSTALL.EXE"},
+                    {"asset_path": "assets/INSTALL.HLP", "dos_path": "C:/LSL1VGA/INSTALL.HLP", "optional": true},
+                    {"asset_path": "assets/INSTALL.TXT", "dos_path": "C:/LSL1VGA/INSTALL.TXT", "optional": true},
+                    {"asset_path": "assets/RESOURCE.CFG", "dos_path": "C:/LSL1VGA/RESOURCE.CFG", "optional": true},
+                    {"asset_path": "assets/ADL.DRV", "dos_path": "C:/LSL1VGA/ADL.DRV", "optional": true},
+                    {"asset_path": "assets/IBMKBD.DRV", "dos_path": "C:/LSL1VGA/IBMKBD.DRV", "optional": true},
+                    {"asset_path": "assets/JOYSTICK.DRV", "dos_path": "C:/LSL1VGA/JOYSTICK.DRV", "optional": true},
+                    {"asset_path": "assets/MT32.DRV", "dos_path": "C:/LSL1VGA/MT32.DRV", "optional": true},
+                    {"asset_path": "assets/MTBLAST.DRV", "dos_path": "C:/LSL1VGA/MTBLAST.DRV", "optional": true},
+                    {"asset_path": "assets/PROAUDIO.DRV", "dos_path": "C:/LSL1VGA/PROAUDIO.DRV", "optional": true},
+                    {"asset_path": "assets/SNDBLAST.DRV", "dos_path": "C:/LSL1VGA/SNDBLAST.DRV", "optional": true},
+                    {"asset_path": "assets/STD.DRV", "dos_path": "C:/LSL1VGA/STD.DRV", "optional": true},
+                    {"asset_path": "assets/VGA320.DRV", "dos_path": "C:/LSL1VGA/VGA320.DRV", "optional": true},
+                    {"asset_path": "assets/VGA320BW.DRV", "dos_path": "C:/LSL1VGA/VGA320BW.DRV", "optional": true}
+                ],
+                "autoexec": [
+                    "C:",
+                    "cd LSL1VGA",
+                    "SET BLASTER=A220 I7 D1 T4",
+                    "INSTALL.EXE"
+                ]
+            },
+            "saves": {
+                "enabled": true,
+                "scope": "shared",
+                "save_paths": [
+                    "C:/LSL1VGA/RESOURCE.CFG"
+                ],
+                "max_size_kb": 512
+            }
+        }
+    },
+    "saves": {
+        "enabled": true,
+        "scope": "user",
+        "save_paths": [
+            "C:/LSL1VGA/LSL1SG.*",
+            "C:/LSL1VGA/*.SAV",
+            "C:/LSL1VGA/RESOURCE.CFG"
+        ],
+        "max_size_kb": 2048
+    },
+    "credits": {
+        "session_cost": 0
+    }
+}

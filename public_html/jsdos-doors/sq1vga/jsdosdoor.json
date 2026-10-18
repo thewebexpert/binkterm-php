@@ -1,0 +1,123 @@
+{
+    "id": "sq1vga",
+    "name": "Space Quest I: The Sarien Encounter (VGA)",
+    "version": "1.0",
+    "author": "Sierra On-Line",
+    "description": "Step into the space boots of Roger Wilco, sanitation engineer turned unlikely hero, in this 1991 VGA remake of the classic sci-fi adventure.",
+    "icon": "icon.png",
+    "genre": ["JSDOS", "Adventure", "Sci-Fi", "Classic"],
+    "emulator": "jsdos",
+    "emulator_config": {
+        "cpu_cycles": "9000",
+        "memory_mb": 16,
+        "machine": "vga",
+        "output": "surface",
+        "scaler": "normal2x",
+        "autolock": true,
+        "game_files": [
+            {"asset_path": "assets/433.V56", "dos_path": "C:/SQ1/433.V56"},
+            {"asset_path": "assets/533.V56", "dos_path": "C:/SQ1/533.V56"},
+            {"asset_path": "assets/ADL.DRV", "dos_path": "C:/SQ1/ADL.DRV"},
+            {"asset_path": "assets/CMS.DRV", "dos_path": "C:/SQ1/CMS.DRV"},
+            {"asset_path": "assets/IBMKBD.DRV", "dos_path": "C:/SQ1/IBMKBD.DRV"},
+            {"asset_path": "assets/IBMPS1.DRV", "dos_path": "C:/SQ1/IBMPS1.DRV"},
+            {"asset_path": "assets/INSTALL.EXE", "dos_path": "C:/SQ1/INSTALL.EXE"},
+            {"asset_path": "assets/INSTALL.HLP", "dos_path": "C:/SQ1/INSTALL.HLP"},
+            {"asset_path": "assets/INSTALL.SCR", "dos_path": "C:/SQ1/INSTALL.SCR"},
+            {"asset_path": "assets/INSTALL.TXT", "dos_path": "C:/SQ1/INSTALL.TXT"},
+            {"asset_path": "assets/INTERP.TXT", "dos_path": "C:/SQ1/INTERP.TXT"},
+            {"asset_path": "assets/JOYSTICK.DRV", "dos_path": "C:/SQ1/JOYSTICK.DRV"},
+            {"asset_path": "assets/MT32.DRV", "dos_path": "C:/SQ1/MT32.DRV"},
+            {"asset_path": "assets/MTBLAST.DRV", "dos_path": "C:/SQ1/MTBLAST.DRV"},
+            {"asset_path": "assets/PROAUDIO.DRV", "dos_path": "C:/SQ1/PROAUDIO.DRV"},
+            {"asset_path": "assets/README", "dos_path": "C:/SQ1/README"},
+            {"asset_path": "assets/RESOURCE.000", "dos_path": "C:/SQ1/RESOURCE.000"},
+            {"asset_path": "assets/RESOURCE.001", "dos_path": "C:/SQ1/RESOURCE.001"},
+            {"asset_path": "assets/RESOURCE.002", "dos_path": "C:/SQ1/RESOURCE.002"},
+            {"asset_path": "assets/RESOURCE.003", "dos_path": "C:/SQ1/RESOURCE.003"},
+            {"asset_path": "assets/RESOURCE.004", "dos_path": "C:/SQ1/RESOURCE.004"},
+            {"asset_path": "assets/RESOURCE.CFG", "dos_path": "C:/SQ1/RESOURCE.CFG"},
+            {"asset_path": "assets/RESOURCE.MAP", "dos_path": "C:/SQ1/RESOURCE.MAP"},
+            {"asset_path": "assets/SCIDHUV.EXE", "dos_path": "C:/SQ1/SCIDHUV.EXE"},
+            {"asset_path": "assets/SNDBLAST.DRV", "dos_path": "C:/SQ1/SNDBLAST.DRV"},
+            {"asset_path": "assets/SQ1GMPAT", "dos_path": "C:/SQ1/SQ1GMPAT"},
+            {"asset_path": "assets/SQ1RS.BAT", "dos_path": "C:/SQ1/SQ1RS.BAT"},
+            {"asset_path": "assets/STD.DRV", "dos_path": "C:/SQ1/STD.DRV"},
+            {"asset_path": "assets/TANDY3V.DRV", "dos_path": "C:/SQ1/TANDY3V.DRV"},
+            {"asset_path": "assets/TANDY3VD.DRV", "dos_path": "C:/SQ1/TANDY3VD.DRV"},
+            {"asset_path": "assets/VERSION", "dos_path": "C:/SQ1/VERSION"},
+            {"asset_path": "assets/VGA320.DRV", "dos_path": "C:/SQ1/VGA320.DRV"},
+            {"asset_path": "assets/VGA320BW.DRV", "dos_path": "C:/SQ1/VGA320BW.DRV"}
+        ],
+        "autoexec": [
+            "C:",
+            "cd SQ1",
+            "SET BLASTER=A220 I7 D1 T4",
+            "SCIDHUV.EXE"
+        ]
+    },
+    "modes": {
+        "config": {
+            "label": "Admin Setup",
+            "description": "Admin-only configuration mode. Launches INSTALL.EXE to configure audio/video drivers and hardware options.",
+            "admin_only": true,
+            "keep_open": true,
+            "emulator_config": {
+                "cpu_cycles": "9000",
+                "memory_mb": 16,
+                "machine": "vga",
+                "output": "surface",
+                "scaler": "normal2x",
+                "autolock": true,
+                "game_files": [
+                    {"asset_path": "assets/INSTALL.EXE", "dos_path": "C:/SQ1/INSTALL.EXE"},
+                    {"asset_path": "assets/INSTALL.HLP", "dos_path": "C:/SQ1/INSTALL.HLP", "optional": true},
+                    {"asset_path": "assets/INSTALL.SCR", "dos_path": "C:/SQ1/INSTALL.SCR", "optional": true},
+                    {"asset_path": "assets/INSTALL.TXT", "dos_path": "C:/SQ1/INSTALL.TXT", "optional": true},
+                    {"asset_path": "assets/RESOURCE.CFG", "dos_path": "C:/SQ1/RESOURCE.CFG", "optional": true},
+                    {"asset_path": "assets/ADL.DRV", "dos_path": "C:/SQ1/ADL.DRV", "optional": true},
+                    {"asset_path": "assets/CMS.DRV", "dos_path": "C:/SQ1/CMS.DRV", "optional": true},
+                    {"asset_path": "assets/IBMKBD.DRV", "dos_path": "C:/SQ1/IBMKBD.DRV", "optional": true},
+                    {"asset_path": "assets/IBMPS1.DRV", "dos_path": "C:/SQ1/IBMPS1.DRV", "optional": true},
+                    {"asset_path": "assets/JOYSTICK.DRV", "dos_path": "C:/SQ1/JOYSTICK.DRV", "optional": true},
+                    {"asset_path": "assets/MT32.DRV", "dos_path": "C:/SQ1/MT32.DRV", "optional": true},
+                    {"asset_path": "assets/MTBLAST.DRV", "dos_path": "C:/SQ1/MTBLAST.DRV", "optional": true},
+                    {"asset_path": "assets/PROAUDIO.DRV", "dos_path": "C:/SQ1/PROAUDIO.DRV", "optional": true},
+                    {"asset_path": "assets/SNDBLAST.DRV", "dos_path": "C:/SQ1/SNDBLAST.DRV", "optional": true},
+                    {"asset_path": "assets/STD.DRV", "dos_path": "C:/SQ1/STD.DRV", "optional": true},
+                    {"asset_path": "assets/TANDY3V.DRV", "dos_path": "C:/SQ1/TANDY3V.DRV", "optional": true},
+                    {"asset_path": "assets/TANDY3VD.DRV", "dos_path": "C:/SQ1/TANDY3VD.DRV", "optional": true},
+                    {"asset_path": "assets/VGA320.DRV", "dos_path": "C:/SQ1/VGA320.DRV", "optional": true},
+                    {"asset_path": "assets/VGA320BW.DRV", "dos_path": "C:/SQ1/VGA320BW.DRV", "optional": true}
+                ],
+                "autoexec": [
+                    "C:",
+                    "cd SQ1",
+                    "SET BLASTER=A220 I7 D1 T4",
+                    "INSTALL.EXE"
+                ]
+            },
+            "saves": {
+                "enabled": true,
+                "scope": "shared",
+                "save_paths": [
+                    "C:/SQ1/RESOURCE.CFG"
+                ],
+                "max_size_kb": 512
+            }
+        }
+    },
+    "saves": {
+        "enabled": true,
+        "scope": "user",
+        "save_paths": [
+            "C:/SQ1/SQ1SG.*",
+            "C:/SQ1/*.SAV",
+            "C:/SQ1/RESOURCE.CFG"
+        ],
+        "max_size_kb": 2048
+    },
+    "credits": {
+        "session_cost": 0
+    }
+}
