@@ -1991,7 +1991,7 @@ return [
     'ui.admin.door_manifest_editor.ai_fill_success' => 'ИИ заполнил {count} поле(й). Проверьте и сохраните.',
     'ui.admin.door_manifest_editor.ai_fill_no_files' => 'Читаемые файлы в директории двери не найдены.',
     'ui.admin.door_manifest_editor.ai_fill_failed' => 'Автозаполнение с помощью ИИ не удалось.',
-    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Этот манифест не управляется через web. Удалите или измените поле "managed" на "web", чтобы включить редактирование.',
+    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Этот манифест не помечен как управляемый через web, поэтому, вероятно, поставляется вместе с BinktermPHP. Вы можете изменить его здесь, но при сохранении он будет помечен как управляемый через web, а будущее обновление может перезаписать ваши изменения. Рекомендуется скопировать каталог двери под новым именем и редактировать эту копию.',
     'ui.admin.door_manifest_editor.native_security_notice' => 'Предупреждение: Нативные двери запускают бинарные файлы хоста напрямую. Устанавливайте только нативные двери из проверенных источников.',
     'ui.admin.door_manifest_editor.public_html_notice' => 'Ресурсы этого типа двери доступны публично из public_html/. Загружённые файлы могут быть скачаны кем угодно.',
 
@@ -2034,7 +2034,7 @@ return [
 
     'ui.admin.door_manifest_editor.status.no_manifest' => 'Нет манифеста',
     'ui.admin.door_manifest_editor.status.web_managed' => 'Управляется через web',
-    'ui.admin.door_manifest_editor.status.unmanaged' => 'Только чтение (неуправляемый)',
+    'ui.admin.door_manifest_editor.status.unmanaged' => 'Не управляется (изменения могут быть перезаписаны)',
 
     'ui.admin.door_manifest_editor.field.game_name' => 'Отображаемое имя',
     'ui.admin.door_manifest_editor.field.game_short_name' => 'Краткое имя',
@@ -2061,6 +2061,11 @@ return [
     'ui.admin.door_manifest_editor.field.max_nodes' => 'Макс. узлов',
     'ui.admin.door_manifest_editor.field.time_per_day' => 'Время в день (мин)',
     'ui.admin.door_manifest_editor.field.time_per_day_help' => 'Максимальное время игры в минутах в день.',
+    'ui.admin.door_manifest_editor.field.data_parser' => 'Парсер данных игры',
+    'ui.admin.door_manifest_editor.field.data_parser_help' => 'Читает файлы игроков самой игры, чтобы результаты появлялись в таблице лидеров двери и в лучших результатах. Оставьте «Нет», если у игры нет парсера.',
+    'ui.admin.door_manifest_editor.field.data_dir' => 'Каталог данных',
+    'ui.admin.door_manifest_editor.field.data_dir_help' => 'Каталог с файлами данных игры относительно каталога двери. Должен находиться внутри папки дверей этого типа.',
+    'ui.admin.door_manifest_editor.data_parser.none' => 'Нет',
     'ui.admin.door_manifest_editor.field.req_dosbox' => 'Требуется DOSBox',
 
     'ui.admin.door_manifest_editor.field.native_executable' => 'Исполняемый файл',

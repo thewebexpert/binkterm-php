@@ -1953,7 +1953,7 @@ return [
     'ui.admin.door_manifest_editor.ai_fill_success' => 'L\'AI ha compilato {count} campo/i. Verificare e salvare.',
     'ui.admin.door_manifest_editor.ai_fill_no_files' => 'Nessun file leggibile trovato nella directory della porta.',
     'ui.admin.door_manifest_editor.ai_fill_failed' => 'Compilazione automatica con AI non riuscita.',
-    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Questo manifesto non e\' gestito via web. Rimuovere o modificare il campo "managed" in "web" per abilitare la modifica.',
+    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Questo manifesto non e\' contrassegnato come gestito via web, quindi probabilmente e\' fornito con BinktermPHP. Puoi modificarlo qui, ma il salvataggio lo contrassegna come gestito via web e un aggiornamento futuro potrebbe sovrascrivere le modifiche. Si consiglia di copiare la directory della porta con un nuovo nome e modificare quella copia.',
     'ui.admin.door_manifest_editor.native_security_notice' => 'Attenzione: le porte native eseguono direttamente binari dell\'host. Installare solo porte native da fonti affidabili.',
     'ui.admin.door_manifest_editor.public_html_notice' => 'Le risorse per questo tipo di porta sono servite pubblicamente da public_html/. I file caricati potrebbero essere scaricati da chiunque.',
 
@@ -1996,7 +1996,7 @@ return [
 
     'ui.admin.door_manifest_editor.status.no_manifest' => 'Nessun manifesto',
     'ui.admin.door_manifest_editor.status.web_managed' => 'Gestito via web',
-    'ui.admin.door_manifest_editor.status.unmanaged' => 'Sola lettura (non gestito)',
+    'ui.admin.door_manifest_editor.status.unmanaged' => 'Non gestito (le modifiche possono essere sovrascritte)',
 
     'ui.admin.door_manifest_editor.field.game_name' => 'Nome visualizzato',
     'ui.admin.door_manifest_editor.field.game_short_name' => 'Nome breve',
@@ -2023,6 +2023,11 @@ return [
     'ui.admin.door_manifest_editor.field.max_nodes' => 'Nodi massimi',
     'ui.admin.door_manifest_editor.field.time_per_day' => 'Tempo al giorno (min)',
     'ui.admin.door_manifest_editor.field.time_per_day_help' => 'Minuti massimi che un utente puo\' giocare al giorno.',
+    'ui.admin.door_manifest_editor.field.data_parser' => 'Parser dati del gioco',
+    'ui.admin.door_manifest_editor.field.data_parser_help' => 'Legge i file giocatore del gioco in modo che i punteggi compaiano nella classifica della porta e in Migliori punteggi. Lasciare Nessuno se il gioco non ha un parser.',
+    'ui.admin.door_manifest_editor.field.data_dir' => 'Directory dati',
+    'ui.admin.door_manifest_editor.field.data_dir_help' => 'Directory con i file dati del gioco, relativa alla directory della porta. Deve restare nella cartella delle porte di questo tipo.',
+    'ui.admin.door_manifest_editor.data_parser.none' => 'Nessuno',
     'ui.admin.door_manifest_editor.field.req_dosbox' => 'Richiede DOSBox',
 
     'ui.admin.door_manifest_editor.field.native_executable' => 'Eseguibile',

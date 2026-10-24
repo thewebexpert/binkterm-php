@@ -43,6 +43,7 @@ Make sure you have a current backup of your database and files before upgrading.
   - [Telnet Address on the Dashboard](#telnet-address-on-the-dashboard)
   - [ANSI Avatars](#ansi-avatars)
   - [Fixed: BBS Menu Shell Scripts](#fixed-bbs-menu-shell-scripts)
+  - [robots.txt Added](#robotstxt-added)
 - [Web Doors](#web-doors)
   - [Longer Browser Caching for Door Assets](#longer-browser-caching-for-door-assets)
   - [RLogin Door Asset Sizes Stored in the Database](#rlogin-door-asset-sizes-stored-in-the-database)
@@ -56,6 +57,8 @@ Make sure you have a current backup of your database and files before upgrading.
   - [Fixed: PubTerm Native Door Block Graphics](#fixed-pubterm-native-door-block-graphics)
   - [Door Category Tabs and Door Display Settings](#door-category-tabs-and-door-display-settings)
   - [Door Admin Pages: Settings List and Runtime Settings in the Manifest Editor](#door-admin-pages-settings-list-and-runtime-settings-in-the-manifest-editor)
+  - [RLogin Doors: Emulate Modem Speed](#rlogin-doors-emulate-modem-speed)
+  - [Optional Custom Default Door Icon](#optional-custom-default-door-icon)
 - [MeshCore](#meshcore)
   - [Radio Settings Link on the Dashboard](#radio-settings-link-on-the-dashboard)
 - [Networks](#networks)
@@ -137,6 +140,7 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Telnet address on the dashboard:** the System Information card now shows the address Telnet users connect to, and shrinks the text to fit on one line.
 - **ANSI avatars:** each user can paint or import one 10 by 6 Synchronet-compatible CP437 avatar on their profile. It appears on public profiles and in the terminal profile viewer. A new `user_ansi_avatars` table is created by the migration.
 - **Fixed: BBS menu shell scripts:** pages in the BBS menu shell now load the per-user storage helper and receive the user's settings, and the ANSI.SYS script is no longer loaded twice.
+- **robots.txt added:** a `robots.txt` now asks search engines not to crawl `/admin/` or `/api/`.
 
 ### Web Doors
 
@@ -152,12 +156,18 @@ Make sure you have a current backup of your database and files before upgrading.
 - **Fixed: PubTerm native door block graphics:** the PubTerm native door now uses CP437 output and an 8-bit Telnet connection, so ANSI block graphics display correctly instead of as replacement characters.
 - **Door category tabs and door display settings:** the door games page can now group doors by category (genre) instead of by runtime type, with filter tabs and live counts, and the door editors have a category dropdown. A new **Doors** tab under **Admin -> Appearance & Content** controls the grouping, whether DoorParty, BBSLink and A-Net keep their own tabs, and whether the Top Scores leaderboard is shown.
 - **Door admin pages: settings list and runtime settings in the manifest editor:** the DOS, Native, JS-DOS and Web door pages under **Admin** now open on a **Settings** tab that lists each door, with the raw JSON file moved to a **JSON** tab. The Door Manifest Editor also gained a **Runtime Settings** card, so a door's manifest and its enabled state, credit cost and limits are saved together with one Save.
+- **RLogin doors: emulate modem speed:** each RLogin door has a new **Emulate Modem Speed** option that slows the door's output to the door's terminal speed, so text and ANSI art draw at dialup pace in the browser, Telnet and SSH.
+- **Optional custom default door icon:** doors that do not declare their own icon are shown with `/favicon.svg`. Place a PNG at `public_html/images/dos-door-icon.png` to use your own instead.
 
 ### MeshCore
 
 - **Radio settings link on the dashboard:** the PacketBBS Nodes card on the main dashboard now includes a "My MeshCore radios" link that opens the MeshCore tab of your user settings, where you manage your radios.
 
-### Networks
+#### Optional Custom Default Door Icon
+
+Doors that do not declare their own icon are shown on `/games` with a default icon, which is `/favicon.svg`. To use your own, place a PNG file at `public_html/images/dos-door-icon.png`, creating the `images` directory if needed. It is used automatically when present. Doors that declare an icon in their manifest are not affected.
+
+## Networks
 
 - **SysopNet added to the networks list:** SysopNet (zone 23, hub 23:1/1), an FTN for sysops run by sysops, is now registered automatically on upgrade, so it appears in **Admin -> Networks** without being created by hand.
 - **Networks listed alphabetically:** the network list in **Admin -> Networks** and the network dropdown when editing an uplink are now sorted purely by name.
@@ -527,6 +537,10 @@ Pages rendered with the BBS menu shell did not load `user-storage.js`, so script
 
 The shell also loaded `ansisys.js` unconditionally in its base template, while individual pages loaded it again. It is now loaded once, and only when the shell's appearance variant is `ansi`.
 
+### robots.txt Added
+
+BinktermPHP now ships `public_html/robots.txt`. It allows crawlers to visit the site in general, but asks them to stay out of `/admin/` and `/api/`. If your web server already serves its own `robots.txt` from the web root, or you replaced this file, keep whichever you want; the file is only a request to well-behaved crawlers and does not restrict access.
+
 ## Web Doors
 
 ### Longer Browser Caching for Door Assets
@@ -652,6 +666,20 @@ The settings available in the form depend on the door type:
 Config file entries the form does not list, such as a WebDoor's own game settings or a Native door's `terminal_size`, are kept as they are. Clearing a number or text field removes that setting from the file. The left-hand list of doors on these pages was removed because the Settings tab replaces it; **Enable All** and **Disable All** on the DOS and Native pages and the list of door directories without a manifest are unchanged.
 
 **Runtime Settings in the Door Manifest Editor.** The editor for a door's manifest now ends with a **Runtime Settings** card containing the same settings as the table above. **Save** writes the manifest and then updates that door's entry in the config file, in one step. Only the settings listed above are changed, and other entries for the door in the file are preserved. As with all admin config writes, this is done by the admin daemon, so restart the admin daemon after upgrading for the new card to save.
+
+### RLogin Doors: Emulate Modem Speed
+
+BBS door games were written for dialup modems, and their screens and ANSI art appear instantly over a modern connection. An RLogin door can now slow its output to look the way it did on a modem.
+
+To turn it on, go to **Admin -> RLogin Doors**, edit the door and tick **Emulate Modem Speed**. The door's **Terminal Speed** sets the baud rate to emulate, and 38400 is used when none is set. On the Telnet and SSH terminal server, a door with no terminal speed set is slowed to 28800 baud. Save the door.
+
+While it is on:
+
+- output is sent in small bursts about 35 times a second, at the speed of the chosen baud rate, counting 10 bits for each character;
+- in the browser, pressing a key while the door is still drawing sends the rest of the queued output at once, so typing does not lag;
+- on Telnet and SSH, the door's speed applies only while that door is running, and the terminal server's own speed setting is restored when the door exits.
+
+The option is off by default, and doors that already exist are unchanged. A new `emulate_modem_speed` column on the `rlogin_doors` table is added by the upgrade migration. Restart the DOS door bridge and the Telnet and SSH daemons after upgrading so they load the new code.
 
 ## Networks
 

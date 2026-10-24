@@ -1716,7 +1716,7 @@ Vous pouvez envoyer des rappels individuels en utilisant les boutons « Rappeler
     'ui.admin.door_manifest_editor.ai_fill_success' => 'L\'IA a rempli {count} champ(s). Vérifiez et sauvegardez.',
     'ui.admin.door_manifest_editor.ai_fill_no_files' => 'Aucun fichier lisible trouvé dans le répertoire de la porte.',
     'ui.admin.door_manifest_editor.ai_fill_failed' => 'Échec du remplissage automatique par IA.',
-    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Ce manifeste n\'est pas géré par le web. Supprimez ou modifiez le champ "managed" en "web" pour activer l\'édition.',
+    'ui.admin.door_manifest_editor.unmanaged_notice' => 'Ce manifeste n\'est pas marqué comme géré par le web ; il s\'agit probablement d\'un manifeste livré avec BinktermPHP. Vous pouvez le modifier ici, mais l\'enregistrement le marque comme géré par le web et une mise à niveau future pourrait écraser vos modifications. Il est recommandé de copier le répertoire de la porte sous un nouveau nom et de modifier cette copie.',
     'ui.admin.door_manifest_editor.native_security_notice' => 'Avertissement : Les portes natives exécutent des binaires de l\'hôte directement. N\'installez que des portes natives provenant de sources fiables.',
     'ui.admin.door_manifest_editor.public_html_notice' => 'Les ressources de ce type de porte sont servies publiquement depuis public_html/. Les fichiers téléversés peuvent être téléchargés par n\'importe qui.',
 
@@ -1759,7 +1759,7 @@ Vous pouvez envoyer des rappels individuels en utilisant les boutons « Rappeler
 
     'ui.admin.door_manifest_editor.status.no_manifest' => 'Pas de manifeste',
     'ui.admin.door_manifest_editor.status.web_managed' => 'Géré par le web',
-    'ui.admin.door_manifest_editor.status.unmanaged' => 'Lecture seule (non géré)',
+    'ui.admin.door_manifest_editor.status.unmanaged' => 'Non géré (modifications écrasables)',
 
     'ui.admin.door_manifest_editor.field.game_name' => 'Nom affiché',
     'ui.admin.door_manifest_editor.field.game_short_name' => 'Nom court',
@@ -1786,6 +1786,11 @@ Vous pouvez envoyer des rappels individuels en utilisant les boutons « Rappeler
     'ui.admin.door_manifest_editor.field.max_nodes' => 'Nœuds maximum',
     'ui.admin.door_manifest_editor.field.time_per_day' => 'Temps par jour (min)',
     'ui.admin.door_manifest_editor.field.time_per_day_help' => 'Minutes maximum qu\'un utilisateur peut jouer par jour.',
+    'ui.admin.door_manifest_editor.field.data_parser' => 'Analyseur de données du jeu',
+    'ui.admin.door_manifest_editor.field.data_parser_help' => 'Lit les fichiers joueurs du jeu afin que les scores apparaissent dans le classement de la porte et dans Meilleurs scores. Laissez Aucun si le jeu n\x27a pas d\x27analyseur.',
+    'ui.admin.door_manifest_editor.field.data_dir' => 'Répertoire de données',
+    'ui.admin.door_manifest_editor.field.data_dir_help' => 'Répertoire contenant les fichiers de données du jeu, relatif au répertoire de la porte. Doit rester dans le dossier des portes de ce type.',
+    'ui.admin.door_manifest_editor.data_parser.none' => 'Aucun',
     'ui.admin.door_manifest_editor.field.req_dosbox' => 'Nécessite DOSBox',
 
     'ui.admin.door_manifest_editor.field.native_executable' => 'Exécutable',
